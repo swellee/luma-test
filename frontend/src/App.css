@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+:root {
+  --color-background-from: #e0f2fe;
+  --color-background-mid: #bae6fd;
+  --color-background-to: #dbeafe;
+  --color-header-bg-from: #7dd3fc;
+  --color-header-bg-mid: #38bdf8;
+  --color-header-bg-to: #a5b4fc;
+  --color-container-bg-from: #f0f9ff;
+  --color-container-bg-mid: #bae6fdff;
+  --color-container-bg-to: #d9f2ffff;
+  --color-border: #7bd1ffff;
+  --color-card-bg-from: #f0f9ff;
+  --color-card-bg-to: #ffffff;
+  --color-shadow: #7dd3fc;
+
+}
+body {
+  @apply h-screen bg-gradient-to-br from-(--color-background-from) via-(--color-background-mid) to-(--color-background-to) bg-no-repeat bg-fixed;
+}
+
+.header-bg{
+  @apply bg-gradient-to-r from-(--color-header-bg-from) via-(--color-header-bg-mid) to-(--color-header-bg-to) text-white border-b border-(--color-border);
+}
+.header-bg-v{
+  @apply bg-gradient-to-t from-(--color-header-bg-from) via-(--color-header-bg-mid) to-(--color-header-bg-to) text-white border-b border-(--color-border);
+}
+.container-bg-h {
+  @apply bg-gradient-to-r from-(--color-container-bg-from) via-(--color-container-bg-mid) to-(--color-container-bg-to) backdrop-blur-sm shadow-xl shadow-(--color-shadow);
+}
+.container-bg-v {
+  @apply bg-gradient-to-t from-(--color-container-bg-from) via-(--color-container-bg-mid) to-(--color-container-bg-to) backdrop-blur-sm shadow-xl shadow-(--color-shadow);
+}
+.card-bg{
+  @apply overflow-hidden border border-(--color-border) bg-gradient-to-br from-(--color-card-bg-from) to-(--color-card-bg-to)  backdrop-blur-sm shadow-lg hover:shadow-2xl hover:shadow-(--color-shadow) transition-all;
+}

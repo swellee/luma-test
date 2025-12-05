@@ -1,0 +1,32 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+  
+    {
+      "name": "Backend Debug",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "program": "${workspaceFolder}/backend/main.go",
+      "env": {
+        "GIN_MODE": "debug",
+        "PORT": "8080"
+      },
+      "showLog": true,
+      "trace": "verbose"
+    },
+    {
+      "name": "Frontend Debug",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "cwd": "${workspaceFolder}/frontend",
+      "runtimeArgs": ["run", "dev"],
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    }
+  ]
+}

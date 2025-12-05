@@ -1,0 +1,48 @@
+*/.env
+
+# Go相关文件
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Go测试文件
+go.mod
+go.sum
+go.work.sum
+
+# 编译产物
+*.o
+*.a
+*.so
+bin/
+*.exe
+
+# 开发环境文件
+.env
+.env.local
+.env.*.local
+
+# IDE相关
+/.vscode
+.idea/
+*.swp
+*.swo
+
+# 日志文件
+*.log
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 构建产物
+dist/
+build/
+*/dist/
+*/.next/
+*/build/
+
+# 依赖目录
+vendor/

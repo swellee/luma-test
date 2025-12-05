@@ -46,6 +46,7 @@ export type Package = {
 export enum TaskStatus {
   created = "created",
   processing = "processing",
+  processed = "processed",
   approved = "approved",
   rejected = "rejected",
 }
@@ -53,8 +54,40 @@ export type Task = {
   id: number;
   name: string;
   packageId: number;
-  assignedTo: number; // user id
+  annotator: number; // 标注员 user id
+  reviewer: number;  // 审核员 user id
   status: TaskStatus;
+  created_at: string;
+};
+
+export type TaskDetail = Task & {
+  items: string[];
+};
+
+export type TaskListRequest = {
+  user_id?: number;
+  status?: TaskStatus;
+  page: number;
+  page_size: number;
+};
+
+export type TaskListResponse = {
+  list: Task[];
+  total: number;
+};
+
+export type TaskClaimRequest = {
+  task_id: number;
+};
+
+export type TaskStatusUpdateRequest = {
+  task_id: number;
+  status: TaskStatus;
+};
+
+export type TaskAssignRequest = {
+  task_id: number;
+  user_id: number;
 };
 export type Bucket = BucketReq & { id: number };
 
@@ -104,4 +137,9 @@ export type ObjectInfo = {
   type: string; // "image" or "video"
   size: number;
   last_modified: string;
+}
+
+export type BucketObjectListRes = {
+  list: ObjectInfo[];
+  total: number;
 }

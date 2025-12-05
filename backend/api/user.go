@@ -74,6 +74,7 @@ func Register(c *gin.Context) {
 		ID:        user.ID,
 		Username:  user.Username,
 		Email:     user.Email,
+		Role:      user.Role,
 		CreatedAt: user.CreatedAt,
 	}
 
@@ -93,7 +94,7 @@ func Login(c *gin.Context) {
 
 	user, err := userService.LoginUser(&req)
 	if err != nil {
-		utils.ResponseErr(c, err.Error(), http.StatusUnauthorized)
+		utils.ResponseErr(c, err.Error(), http.StatusNotFound)
 		return
 	}
 
@@ -109,6 +110,7 @@ func Login(c *gin.Context) {
 		ID:        user.ID,
 		Username:  user.Username,
 		Email:     user.Email,
+		Role:      user.Role,
 		CreatedAt: user.CreatedAt,
 	}
 

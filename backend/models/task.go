@@ -10,38 +10,73 @@ type TaskStatus string
 const (
 	TaskStatusCreated    TaskStatus = "created"
 	TaskStatusProcessing TaskStatus = "processing"
+	TaskStatusProcessed  TaskStatus = "processed"
 	TaskStatusApproved   TaskStatus = "approved"
 	TaskStatusRejected   TaskStatus = "rejected"
 )
 
 // Task 任务模型
 type Task struct {
-	ID         int64      `xorm:"pk autoincr 'id'" json:"id"`
-	Name       string     `xorm:"varchar(100) not null 'name'" json:"name"`
-	PackageID  int64      `xorm:"'package_id' not null" json:"packageId"`
-	AssignedTo int64      `xorm:"'assigned_to'" json:"assignedTo"` // 用户ID
-	Status     TaskStatus `xorm:"varchar(20) 'status'" json:"status"`
-	CreatedAt  time.Time  `xorm:"created 'created_at'" json:"created_at"`
-	UpdatedAt  time.Time  `xorm:"updated 'updated_at'" json:"updated_at"`
+	ID        int64      `xorm:"pk autoincr 'id'" json:"id"`
+	Name      string     `xorm:"varchar(100) not null 'name'" json:"name"`
+	PackageID int64      `xorm:"'package_id' not null" json:"packageId"`
+	Annotator int64      `xorm:"'annotator'" json:"annotator"` // 标注员用户ID
+	Reviewer  int64      `xorm:"'reviewer'" json:"reviewer"`   // 审核员用户ID
+	Status    TaskStatus `xorm:"varchar(20) 'status'" json:"status"`
+	CreatedAt time.Time  `xorm:"created 'created_at'" json:"created_at"`
+	UpdatedAt time.Time  `xorm:"updated 'updated_at'" json:"updated_at"`
 }
 
 // TaskResponse 任务响应
 type TaskResponse struct {
-	ID         int64      `json:"id"`
-	Name       string     `json:"name"`
-	PackageID  int64      `json:"packageId"`
-	AssignedTo int64      `json:"assignedTo"`
-	Status     TaskStatus `json:"status"`
-	CreatedAt  time.Time  `json:"created_at"`
+	ID        int64      `json:"id"`
+	Name      string     `json:"name"`
+	PackageID int64      `json:"packageId"`
+	Annotator int64      `json:"annotator"`
+	Reviewer  int64      `json:"reviewer"`
+	Status    TaskStatus `json:"status"`
+	CreatedAt time.Time  `json:"created_at"`
 }
 
 // TaskDetailResponse 任务详情响应（包含items）
 type TaskDetailResponse struct {
-	ID         int64      `json:"id"`
-	Name       string     `json:"name"`
-	PackageID  int64      `json:"packageId"`
-	AssignedTo int64      `json:"assignedTo"`
-	Status     TaskStatus `json:"status"`
-	Items      []string   `json:"items"`
-	CreatedAt  time.Time  `json:"created_at"`
+	ID        int64      `json:"id"`
+	Name      string     `json:"name"`
+	PackageID int64      `json:"packageId"`
+	Annotator int64      `json:"annotator"`
+	Reviewer  int64      `json:"reviewer"`
+	Status    TaskStatus `json:"status"`
+	Items     []string   `json:"items"`
+	CreatedAt time.Time  `json:"created_at"`
+}
+
+// TaskListRequest 任务列表请求
+type TaskListRequest struct {
+	UserID   int64      `form:"user_id"`
+	Status   TaskStatus `form:"status"`
+	Page     int        `form:"page" binding:"required,min=1"`
+	PageSize int        `form:"page_size" binding:"required,min=1,max=100"`
+}
+
+// TaskListResponse 任务列表响应
+type TaskListResponse struct {
+	List  []TaskResponse `json:"list"`
+	Total int64          `json:"total"`
+}
+
+// TaskAssignRequest 任务分配请求
+type TaskAssignRequest struct {
+	TaskID int64 `json:"task_id" binding:"required"`
+	UserID int64 `json:"user_id" binding:"required"`
+}
+
+// TaskStatusUpdateRequest 任务状态更新请求
+type TaskStatusUpdateRequest struct {
+	TaskID int64      `json:"task_id" binding:"required"`
+	Status TaskStatus `json:"status" binding:"required"`
+}
+
+// TaskClaimRequest 任务领取请求
+type TaskClaimRequest struct {
+	TaskID int64 `json:"task_id" binding:"required"`
 }

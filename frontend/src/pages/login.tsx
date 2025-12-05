@@ -52,7 +52,7 @@ export default function Login() {
         </div>
       </div>
 
-      <div className="bg-white/40 flex flex-col w-full md:flex-4 md:w-1/2 items-center justify-center p-4 md:p-8 md:rounded-sm">
+      <div className="bg-black/40 flex flex-col w-full md:flex-4 md:w-1/2 items-center justify-center p-4 md:p-8 md:rounded-sm">
         <div className="w-full md:w-3/5">
           <Form
             form={form}

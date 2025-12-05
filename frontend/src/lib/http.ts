@@ -51,8 +51,8 @@ export const http = async <T>(
         window.location.href = router_login;
       }
     }
-    message.error(response.message);
-    throw new Error(response.message);
+    message.error(response.error);
+    throw new Error(response.error);
   }
   return response.data as T;
 };

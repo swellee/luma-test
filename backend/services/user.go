@@ -139,7 +139,7 @@ func (us *UserService) RegisterUser(req *models.UserRegisterRequest) (*models.Us
 		Username: req.Username,
 		Email:    req.Email,
 		Password: hashedPassword,
-		Role:     req.Role,
+		Role:     models.Role(req.Role),
 	}
 
 	// 插入数据库

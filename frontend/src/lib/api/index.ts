@@ -2,7 +2,8 @@ import { bucket } from "./bucket";
 import { fileApi as file } from "./file";
 import { msg } from "./msg";
 import { packages } from "./package";
-import {  user } from "./user";
+import { user } from "./user";
+import { task } from "./task";
 
 export const api = {
     user,
@@ -10,4 +11,5 @@ export const api = {
     file,
     msg,
     packages,
+    task,
 }

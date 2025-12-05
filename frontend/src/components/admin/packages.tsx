@@ -9,7 +9,7 @@ export default function AdminPackages() {
   const packageModalProps = usePackageAddModal(bucketModalProps.open);
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4 flex items-center">Package Management
+      <h1 className="text-2xl! text-green-900 font-bold mb-4 flex items-center">Package Management
         <Button className="ml-auto" onClick={()=>bucketModalProps.open()}>
           add bucket
         </Button>

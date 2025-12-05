@@ -1,18 +1,27 @@
 @import "tailwindcss";
 
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: inherit;
+  font-weight: bold;
+}
 :root {
-  --color-background-from: #e0f2fe;
-  --color-background-mid: #bae6fd;
-  --color-background-to: #dbeafe;
-  --color-header-bg-from: #7dd3fc;
-  --color-header-bg-mid: #38bdf8;
-  --color-header-bg-to: #a5b4fc;
-  --color-container-bg-from: #f0f9ff;
-  --color-container-bg-mid: #bae6fdff;
-  --color-container-bg-to: #d9f2ffff;
-  --color-border: #7bd1ffff;
-  --color-card-bg-from: #f0f9ff;
-  --color-card-bg-to: #ffffff;
+  --color-background-from: #011e1e;
+  --color-background-mid: #021722;
+  --color-background-to: #00060b;
+  --color-header-bg-from: #132128;
+  --color-header-bg-mid: #081b23;
+  --color-header-bg-to: #1a1c28;
+  --color-container-bg-from: #011e1e;
+  --color-container-bg-mid: #021722;
+  --color-container-bg-to: #00060b;
+  --color-border: rgb(2, 39, 58);
+  --color-card-bg-from: #011e1e;
+  --color-card-bg-to: #021722;
   --color-shadow: #7dd3fc;
 
 }

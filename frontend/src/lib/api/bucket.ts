@@ -1,6 +1,6 @@
 import { message } from "antd";
 import { http } from "../http";
-import { Bucket, BucketAccess, BucketReq, ListBucketRes, ObjectInfo } from "../types";
+import { Bucket, BucketAccess, BucketObjectListRes, BucketReq, ListBucketRes, ObjectInfo } from "../types";
 import { S3Client, ListObjectsCommand,GetObjectCommand, HeadBucketCommand } from "@aws-sdk/client-s3";
 
 
@@ -26,7 +26,7 @@ export const bucket = {
         })
     },
     async listObjects(bucketId: number, prefix?: string, page: number = 1, pageSize: number = 100) {
-        return http<ObjectInfo[]>("/bucket/objects", {
+        return http<BucketObjectListRes>("/bucket/objects", {
             params: {
                 bucket_id: bucketId,
                 prefix,

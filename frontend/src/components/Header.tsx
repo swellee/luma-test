@@ -1,11 +1,4 @@
-import {
-  Layout,
-  Button,
-  Avatar,
-  Dropdown,
-  Badge,
-  notification,
-} from "antd";
+import { Layout, Button, Avatar, Dropdown, Badge, notification } from "antd";
 import { UserOutlined } from "@ant-design/icons";
 import { useUserStore } from "@/store/user_store";
 import {
@@ -120,19 +113,23 @@ export default function Header({ className }: { className?: string }) {
   return (
     <AntHeader
       className={cn(
-        "w-screen overflow-x-hidden border-b p-2! header-bg h-14 flex items-center",
+        "w-screen overflow-x-hidden border-b p-2! bg-black! h-14 flex items-center",
         className
       )}
     >
-      <div className="flex items-center w-full">
+      <div className="flex items-center w-full px-6">
         <Link
           to="/"
-          className="text-2xl font-bold text-(--color-text-title)! mr-3 md:mr-8 relative z-2"
+          className="text-3xl font-bold text-sky-200! mr-3 md:mr-8 relative z-2"
         >
           Luma Labs
         </Link>
-
-        <div className="flex items-center gap-4 ml-auto">
+        {user?.username && (
+          <div className="ml-auto text-gray-500">
+            <div >{user?.username}</div>
+          </div>
+        )}
+        <div className={cn("flex items-center gap-4", user?.username ? "ml-2" : "ml-auto")}>
           {!user ? (
             <Button type="text" onClick={goLogin}>
               登录/注册
@@ -142,7 +139,7 @@ export default function Header({ className }: { className?: string }) {
               <Badge count={unread.count} size="small" offset={[0, 0]}>
                 <Avatar
                   size="large"
-                  className="mr-4 bg-sky-600 cursor-pointer bordered border-white/80!"
+                  className="mr-4 bg-sky-600 cursor-pointer bordered border-green-950/80!"
                   icon={<UserOutlined />}
                   src={user?.avatar || default_avatar}
                 />

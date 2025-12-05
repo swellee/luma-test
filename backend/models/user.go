@@ -4,6 +4,15 @@ import (
 	"time"
 )
 
+// Role 用户角色
+type Role string
+
+const (
+	RoleAdmin     Role = "admin"
+	RoleAnnotator Role = "annotator"
+	RoleReviewer  Role = "reviewer"
+)
+
 // User 用户模型
 type User struct {
 	ID        int64     `xorm:"pk autoincr 'id'" json:"id"`
@@ -11,7 +20,7 @@ type User struct {
 	Email     string    `xorm:"varchar(100) unique not null 'email'" json:"email"`
 	Password  string    `xorm:"varchar(255) not null 'password'" json:"-"`
 	Avatar    string    `xorm:"varchar(255) 'avatar'" json:"avatar"`
-	Role      string    `xorm:"varchar(50) 'role'" json:"role"`
+	Role      Role      `xorm:"varchar(50) 'role'" json:"role"`
 	CreatedAt time.Time `xorm:"created 'created_at'" json:"created_at"`
 	UpdatedAt time.Time `xorm:"updated 'updated_at'" json:"updated_at"`
 }
@@ -45,7 +54,7 @@ type UserResponse struct {
 	Username  string    `json:"username"`
 	Email     string    `json:"email"`
 	Avatar    string    `json:"avatar"`
-	Role      string    `json:"role"`
+	Role      Role      `json:"role"`
 	CreatedAt time.Time `json:"created_at"`
 }
 

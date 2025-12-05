@@ -8,6 +8,11 @@ import (
 // SysMsgService 系统消息服务
 type SysMsgService struct{}
 
+// NewSysMsgService 创建系统消息服务实例
+func NewSysMsgService() *SysMsgService {
+	return &SysMsgService{}
+}
+
 // CreateSysMsg 创建系统消息并推送给用户
 func (s *SysMsgService) CreateSysMsg(req *models.SysMsgCreateRequest) (*models.SysMsg, error) {
 	sysMsg := &models.SysMsg{

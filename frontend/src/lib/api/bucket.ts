@@ -14,7 +14,9 @@ import {
   ListObjectsV2CommandInput,
   HeadBucketCommand,
   _Object,
+  GetObjectCommand,
 } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 export type DirectoryNode = {
   key: string; // full prefix
@@ -243,6 +245,27 @@ export const bucket = {
     } catch (error) {
       console.error("Error exploring directory tree:", error);
       return [];
+    }
+  },
+
+  // 获取 S3 对象的 URL（用于图片加载）
+  async getObjectUrl(bucketInfo: Bucket, key: string): Promise<string> {
+    try {
+      const s3 = getS3(bucketInfo.region, bucketInfo.access);
+      
+      // 由于 bucket 不是 public，需要生成预签名 URL
+      const command = new GetObjectCommand({
+        Bucket: bucketInfo.name,
+        Key: key,
+      });
+      
+      // 生成1小时有效的预签名 URL
+      const signedUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
+      return signedUrl;
+    } catch (error) {
+      console.error('Error getting S3 object URL:', error);
+      message.error('获取图片URL失败');
+      throw error;
     }
   },
 };

@@ -1,18 +1,26 @@
 import { api } from "@/lib/api";
 import { Task, TaskStatus } from "@/lib/types";
 import { useAntdTable } from "ahooks";
-import { Button, Table, Tag, message, Space, Modal, Tabs, Dropdown } from "antd";
+import {
+  Button,
+  Table,
+  Tag,
+  message,
+  Space,
+  Modal,
+  Tabs,
+  Dropdown,
+  Popconfirm,
+} from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { useState } from "react";
 import { useUserStore } from "@/store/user_store";
-import { MoreOutlined } from "@ant-design/icons";
+import { CheckSquareFilled, PlayCircleTwoTone } from "@ant-design/icons";
 import { useNavigate } from "react-router";
+import { routr_annotate } from "@/lib/consts";
 
 export default function AnnotatorTasks() {
   const { user } = useUserStore();
   const navigate = useNavigate();
-  const [statusModalVisible, setStatusModalVisible] = useState(false);
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   // 获取可领取的任务列表（created 状态且未分配）
   const {
@@ -59,40 +67,18 @@ export default function AnnotatorTasks() {
     }
   };
 
-  // 完成任务（将状态从 created 变为 processed）
-  const handleCompleteTask = async (task: Task) => {
-    try {
-      await api.task.updateTaskStatus({
-        task_id: task.id,
-        status: TaskStatus.processed,
-      });
-      message.success("Task completed successfully");
-      refreshMyTasks();
-    } catch (error) {
-      message.error("Failed to complete task");
-    }
-  };
-
   const handleProceedTask = async (task: Task) => {
-    navigate(`/annotator/annotate/${task.id}`);
-  }
-  // 打开确认模态框
-  const openStatusModal = (task: Task) => {
-    setSelectedTask(task);
-    setStatusModalVisible(true);
+    navigate(routr_annotate.replace(':id', task.id.toString()));
   };
 
   // 确认完成任务
-  const handleConfirmComplete = async () => {
-    if (!selectedTask) return;
-
+  const handleConfirmComplete = async (record: Task) => {
     try {
       await api.task.updateTaskStatus({
-        task_id: selectedTask.id,
+        task_id: record.id,
         status: TaskStatus.processed,
       });
       message.success("Task completed successfully");
-      setStatusModalVisible(false);
       refreshMyTasks();
     } catch (error) {
       message.error("Failed to complete task");
@@ -201,21 +187,19 @@ export default function AnnotatorTasks() {
       key: "actions",
       width: 150,
       render: (_, record: Task) => (
-        <Dropdown menu={{items:[
-          {
-            key: 'proceed',
-            label: 'Proceed',
-            onClick: () => handleProceedTask(record)
-          },
-          {
-            key: 'complete',
-            label: 'Complete',
-            onClick: () => openStatusModal(record)
-          }
-        ]}}>
-          <MoreOutlined />
-        </Dropdown>
-        
+        <span>
+          <Button
+            icon={<PlayCircleTwoTone />}
+            size="small"
+            onClick={() => handleProceedTask(record)}
+          />
+          <Popconfirm
+            title="Are you sure you want to mark this task as completed? This task will go to reviewers"
+            onConfirm={() => handleConfirmComplete(record)}
+          >
+            <Button icon={<CheckSquareFilled />} size="small" danger />
+          </Popconfirm>
+        </span>
       ),
     },
   ];
@@ -252,35 +236,6 @@ export default function AnnotatorTasks() {
           },
         ]}
       />
-
-      {/* 确认完成任务模态框 */}
-      <Modal
-        title="Complete Task"
-        open={statusModalVisible}
-        onOk={handleConfirmComplete}
-        onCancel={() => setStatusModalVisible(false)}
-        okText="Complete Task"
-        cancelText="Cancel"
-      >
-        <div className="space-y-4">
-          <div>
-            <p>
-              <strong>Task:</strong> {selectedTask?.name}
-            </p>
-            <p>
-              <strong>Current Status:</strong>{" "}
-              {selectedTask && getStatusTag(selectedTask.status)}
-            </p>
-          </div>
-          <div>
-            <p>
-              Are you sure you want to mark this task as completed? This will
-              change the status from <strong>Created</strong> to{" "}
-              <strong>Processed</strong>.
-            </p>
-          </div>
-        </div>
-      </Modal>
     </div>
   );
 }

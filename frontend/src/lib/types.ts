@@ -57,6 +57,7 @@ export type Task = {
   annotator: number; // 标注员 user id
   reviewer: number;  // 审核员 user id
   status: TaskStatus;
+  wipIdx: number; // 当前标注到的 item 索引
   created_at: string;
 };
 
@@ -83,6 +84,10 @@ export type TaskClaimRequest = {
 export type TaskStatusUpdateRequest = {
   task_id: number;
   status: TaskStatus;
+};
+export type TaskWipUpdateRequest = {
+  task_id: number;
+  wipIdx: number;
 };
 
 export type TaskAssignRequest = {

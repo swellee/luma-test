@@ -156,6 +156,7 @@ func (ts *TaskService) GetTaskDetail(taskID int64) (*models.TaskDetailResponse, 
 		Annotator: task.Annotator,
 		Reviewer:  task.Reviewer,
 		Status:    task.Status,
+		WipIdx:    task.WipIdx,
 		Items:     items,
 		CreatedAt: task.CreatedAt,
 	}, nil
@@ -243,6 +244,8 @@ func (ts *TaskService) ClaimTask(taskID, userID int64, userRole string) (*models
 		if task.Annotator > 0 {
 			return nil, errors.New("任务已经被标注员领取")
 		}
+		task.Status = models.TaskStatusProcessing
+		task.Annotator = userID
 	} else if task.Status == models.TaskStatusProcessed {
 		// processed 状态的任务只能由 reviewer 领取
 		if userRole != models.RoleReviewer {
@@ -252,15 +255,10 @@ func (ts *TaskService) ClaimTask(taskID, userID int64, userRole string) (*models
 		if task.Reviewer > 0 {
 			return nil, errors.New("任务已经被审核员领取")
 		}
+		task.Status = models.TaskStatusReviewing
+		task.Reviewer = userID
 	} else {
 		return nil, errors.New("该状态的任务不能被领取")
-	}
-
-	// 分配任务给用户
-	if userRole == models.RoleAnnotator {
-		task.Annotator = userID
-	} else if userRole == models.RoleReviewer {
-		task.Reviewer = userID
 	}
 
 	_, err = config.DB.ID(taskID).Update(task)
@@ -345,6 +343,37 @@ func (ts *TaskService) UpdateTaskStatusWithValidation(taskID, userID int64, user
 		Status:    task.Status,
 		CreatedAt: task.CreatedAt,
 	}, nil
+}
+
+func (ts *TaskService) UpdateTaskWipIdx(taskID, userID int64, newWipIdx int) (*models.TaskResponse, error) {
+	task := &models.Task{}
+	has, err := config.DB.ID(taskID).Get(task)
+	if err != nil {
+		return nil, err
+	}
+	if !has {
+		return nil, errors.New("任务不存在")
+	}
+	if task.Status != models.TaskStatusProcessing && task.Status != models.TaskStatusReviewing {
+		return nil, errors.New("只有 processing/reviewing 状态的任务才能更新 wipIdx")
+	}
+	task.WipIdx = newWipIdx
+	_, err = config.DB.ID(taskID).Update(task)
+	if err != nil {
+		return nil, err
+	}
+
+	return &models.TaskResponse{
+		ID:        task.ID,
+		Name:      task.Name,
+		PackageID: task.PackageID,
+		Annotator: task.Annotator,
+		Reviewer:  task.Reviewer,
+		Status:    task.Status,
+		WipIdx:    task.WipIdx,
+		CreatedAt: task.CreatedAt,
+	}, nil
+
 }
 
 // generateStatusChangeMessages 生成状态变更的系统消息

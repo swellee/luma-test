@@ -7,7 +7,8 @@ import {
   TaskStatusUpdateRequest, 
   TaskAssignRequest,
   CommonRes,
-  Task
+  Task,
+  TaskWipUpdateRequest
 } from "../types"
 
 export const task = {
@@ -49,6 +50,16 @@ export const task = {
    */
   updateTaskStatus(data: TaskStatusUpdateRequest) {
     return http<Task>('/task/status', {
+      method: 'PUT',
+      data
+    })
+  },
+  /**
+   * 更新任务wip
+   * @param data 任务状态更新请求
+   */
+  updateTaskWip(data: TaskWipUpdateRequest) {
+    return http<Task>('/task/wip', {
       method: 'PUT',
       data
     })

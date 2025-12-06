@@ -106,6 +106,28 @@ func UpdateTaskStatus(c *gin.Context) {
 
 	utils.ResponseOk(c, response)
 }
+func UpdateTaskWipIdx(c *gin.Context) {
+	// 获取当前用户信息
+	userID, exists := c.Get("user_id")
+	if !exists {
+		utils.ResponseErr(c, "用户未登录", http.StatusUnauthorized)
+		return
+	}
+
+	var req models.TaskWipUpdateRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		utils.ResponseErr(c, "参数错误: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	response, err := taskService.UpdateTaskWipIdx(req.TaskID, userID.(int64), req.WipIdx)
+	if err != nil {
+		utils.ResponseErr(c, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	utils.ResponseOk(c, response)
+}
 
 // AssignTask 管理员分配任务
 func AssignTask(c *gin.Context) {

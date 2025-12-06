@@ -11,6 +11,7 @@ const (
 	TaskStatusCreated    TaskStatus = "created"
 	TaskStatusProcessing TaskStatus = "processing"
 	TaskStatusProcessed  TaskStatus = "processed"
+	TaskStatusReviewing  TaskStatus = "reviewing"
 	TaskStatusApproved   TaskStatus = "approved"
 	TaskStatusRejected   TaskStatus = "rejected"
 )
@@ -23,6 +24,7 @@ type Task struct {
 	Annotator int64      `xorm:"'annotator'" json:"annotator"` // 标注员用户ID
 	Reviewer  int64      `xorm:"'reviewer'" json:"reviewer"`   // 审核员用户ID
 	Status    TaskStatus `xorm:"varchar(20) 'status'" json:"status"`
+	WipIdx    int        `xorm:"'wip_idx' default(0)" json:"wipIdx"`
 	CreatedAt time.Time  `xorm:"created 'created_at'" json:"created_at"`
 	UpdatedAt time.Time  `xorm:"updated 'updated_at'" json:"updated_at"`
 }
@@ -35,6 +37,7 @@ type TaskResponse struct {
 	Annotator int64      `json:"annotator"`
 	Reviewer  int64      `json:"reviewer"`
 	Status    TaskStatus `json:"status"`
+	WipIdx    int        `json:"wipIdx"`
 	CreatedAt time.Time  `json:"created_at"`
 }
 
@@ -45,6 +48,7 @@ type TaskDetailResponse struct {
 	PackageID int64      `json:"packageId"`
 	Annotator int64      `json:"annotator"`
 	Reviewer  int64      `json:"reviewer"`
+	WipIdx    int        `json:"wipIdx"`
 	Status    TaskStatus `json:"status"`
 	Items     []string   `json:"items"`
 	CreatedAt time.Time  `json:"created_at"`
@@ -74,6 +78,10 @@ type TaskAssignRequest struct {
 type TaskStatusUpdateRequest struct {
 	TaskID int64      `json:"task_id" binding:"required"`
 	Status TaskStatus `json:"status" binding:"required"`
+}
+type TaskWipUpdateRequest struct {
+	TaskID int64 `json:"task_id" binding:"required"`
+	WipIdx int   `json:"wipIdx" binding:"required"`
 }
 
 // TaskClaimRequest 任务领取请求

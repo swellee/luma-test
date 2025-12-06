@@ -12,6 +12,7 @@
   "dependencies": {
     "@ant-design/icons": "^6.1.0",
     "@aws-sdk/client-s3": "^3.943.0",
+    "@aws-sdk/s3-request-presigner": "^3.946.0",
     "@tailwindcss/vite": "^4.1.17",
     "@types/event-source-polyfill": "^1.0.5",
     "@types/md5": "^2.3.6",
@@ -20,6 +21,7 @@
     "antd-img-crop": "^4.27.0",
     "clsx": "^2.1.1",
     "event-source-polyfill": "^1.0.31",
+    "konva": "^10.0.12",
     "md5": "^2.3.0",
     "rc-virtual-list": "^3.19.2",
     "react": "^19.2.0",

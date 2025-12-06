@@ -59,6 +59,7 @@ func SetupRoutes(r *gin.Engine) {
 		protected.GET("/task/list", api.GetTaskList)
 		protected.POST("/task/claim", api.ClaimTask)
 		protected.PUT("/task/status", api.UpdateTaskStatus)
+		protected.PUT("/task/wip", api.UpdateTaskWipIdx)
 		protected.POST("/task/assign", api.AssignTask)
 
 		// 系统消息相关

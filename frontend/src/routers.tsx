@@ -15,9 +15,11 @@ import {
   router_dashboard_packages,
   router_dashboard_packages_edit,
   router_dashboard_tasks,
+  routr_annotate,
 } from "./lib/consts";
 import { useUserStore } from "./store/user_store";
 import ErrorBoundary from "antd/es/alert/ErrorBoundary";
+import Annotate from "./pages/annotate";
 const Home = lazy(() => import("./pages/home"));
 const Dashboard = lazy(() => import("./pages/dashboard"));
 const DashboardUsers = lazy(() => import("./components/admin/users"));
@@ -105,6 +107,10 @@ export const routers = [
         element: <DashboardMessages />,
       },
     ],
+  },
+  {
+    path: routr_annotate,
+    element: <AuthGuard element={<Annotate />} auth={true} />,
   },
   {
     path: "*",

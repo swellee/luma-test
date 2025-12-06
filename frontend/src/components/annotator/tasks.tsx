@@ -1,13 +1,16 @@
 import { api } from "@/lib/api";
 import { Task, TaskStatus } from "@/lib/types";
 import { useAntdTable } from "ahooks";
-import { Button, Table, Tag, message, Space, Modal, Tabs } from "antd";
+import { Button, Table, Tag, message, Space, Modal, Tabs, Dropdown } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useState } from "react";
 import { useUserStore } from "@/store/user_store";
+import { MoreOutlined } from "@ant-design/icons";
+import { useNavigate } from "react-router";
 
 export default function AnnotatorTasks() {
   const { user } = useUserStore();
+  const navigate = useNavigate();
   const [statusModalVisible, setStatusModalVisible] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
@@ -70,6 +73,9 @@ export default function AnnotatorTasks() {
     }
   };
 
+  const handleProceedTask = async (task: Task) => {
+    navigate(`/annotator/annotate/${task.id}`);
+  }
   // 打开确认模态框
   const openStatusModal = (task: Task) => {
     setSelectedTask(task);
@@ -195,17 +201,21 @@ export default function AnnotatorTasks() {
       key: "actions",
       width: 150,
       render: (_, record: Task) => (
-        <Space size="small">
-          {record.status === TaskStatus.created && (
-            <Button
-              type="primary"
-              size="small"
-              onClick={() => openStatusModal(record)}
-            >
-              Complete
-            </Button>
-          )}
-        </Space>
+        <Dropdown menu={{items:[
+          {
+            key: 'proceed',
+            label: 'Proceed',
+            onClick: () => handleProceedTask(record)
+          },
+          {
+            key: 'complete',
+            label: 'Complete',
+            onClick: () => openStatusModal(record)
+          }
+        ]}}>
+          <MoreOutlined />
+        </Dropdown>
+        
       ),
     },
   ];

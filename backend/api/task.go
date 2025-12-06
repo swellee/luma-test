@@ -68,7 +68,7 @@ func ClaimTask(c *gin.Context) {
 		return
 	}
 
-	response, err := taskService.ClaimTask(req.TaskID, userID.(int64), userRole.(models.Role))
+	response, err := taskService.ClaimTask(req.TaskID, userID.(int64), userRole.(string))
 	if err != nil {
 		utils.ResponseErr(c, err.Error(), http.StatusBadRequest)
 		return
@@ -98,7 +98,7 @@ func UpdateTaskStatus(c *gin.Context) {
 		return
 	}
 
-	response, err := taskService.UpdateTaskStatusWithValidation(req.TaskID, userID.(int64), userRole.(models.Role), req.Status)
+	response, err := taskService.UpdateTaskStatusWithValidation(req.TaskID, userID.(int64), userRole.(string), req.Status)
 	if err != nil {
 		utils.ResponseErr(c, err.Error(), http.StatusBadRequest)
 		return
@@ -123,7 +123,7 @@ func AssignTask(c *gin.Context) {
 	}
 
 	// 检查用户角色是否为管理员
-	if userRole.(models.Role) != models.RoleAdmin {
+	if userRole != models.RoleAdmin {
 		utils.ResponseErr(c, "只有管理员可以分配任务", http.StatusForbidden)
 		return
 	}

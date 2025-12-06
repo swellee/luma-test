@@ -21,6 +21,7 @@
     "clsx": "^2.1.1",
     "event-source-polyfill": "^1.0.31",
     "md5": "^2.3.0",
+    "rc-virtual-list": "^3.19.2",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router": "^7.10.0",

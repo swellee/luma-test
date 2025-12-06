@@ -41,6 +41,9 @@ importers:
       md5:
         specifier: ^2.3.0
         version: 2.3.0
+      rc-virtual-list:
+        specifier: ^3.19.2
+        version: 3.19.2(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       react:
         specifier: ^19.2.0
         version: 19.2.1

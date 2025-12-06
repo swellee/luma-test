@@ -213,7 +213,7 @@ func (ts *TaskService) GetTaskList(userID int64, status models.TaskStatus, page,
 }
 
 // ClaimTask 用户领取任务
-func (ts *TaskService) ClaimTask(taskID, userID int64, userRole models.Role) (*models.TaskResponse, error) {
+func (ts *TaskService) ClaimTask(taskID, userID int64, userRole string) (*models.TaskResponse, error) {
 	task := &models.Task{}
 	has, err := config.DB.ID(taskID).Get(task)
 	if err != nil {
@@ -280,7 +280,7 @@ func (ts *TaskService) ClaimTask(taskID, userID int64, userRole models.Role) (*m
 }
 
 // UpdateTaskStatusWithValidation 更新任务状态（带权限验证和系统消息）
-func (ts *TaskService) UpdateTaskStatusWithValidation(taskID, userID int64, userRole models.Role, newStatus models.TaskStatus) (*models.TaskResponse, error) {
+func (ts *TaskService) UpdateTaskStatusWithValidation(taskID, userID int64, userRole string, newStatus models.TaskStatus) (*models.TaskResponse, error) {
 	task := &models.Task{}
 	has, err := config.DB.ID(taskID).Get(task)
 	if err != nil {

@@ -19,6 +19,7 @@ var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
 type JWTClaims struct {
 	UserID   int64  `json:"user_id"`
 	Username string `json:"username"`
+	Role     string `json:"role"`
 	Email    string `json:"email"`
 	jwt.RegisteredClaims
 }
@@ -32,6 +33,7 @@ func GenerateToken(user *models.User) (string, error) {
 		UserID:   user.ID,
 		Username: user.Username,
 		Email:    user.Email,
+		Role:     string(user.Role),
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -88,6 +90,7 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		// 将用户信息存储到上下文中
 		c.Set("user_id", claims.UserID)
+		c.Set("user_role", claims.Role)
 		c.Set("username", claims.Username)
 		c.Set("email", claims.Email)
 

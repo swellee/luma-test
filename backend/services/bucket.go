@@ -196,6 +196,14 @@ func (bs *BucketService) DeleteBucket(id int64) error {
 		return errors.New("存储桶不存在")
 	}
 
+	// 如果有关联的packages，则不允许删除
+	has, err = config.DB.Where("bucket_id = ?", id).Exist(&models.Package{})
+	if err != nil {
+		return err
+	}
+	if has {
+		return errors.New("存储桶下存在关联的packages，无法删除")
+	}
 	// 删除存储桶
 	_, err = config.DB.ID(id).Delete(bucket)
 	return err

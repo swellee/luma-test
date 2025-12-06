@@ -1,24 +1,36 @@
 import { api } from "@/lib/api";
 import { useRequest } from "ahooks";
-import { Form, Input, Modal } from "antd";
+import { Form, Input, message, Modal } from "antd";
 import { useState } from "react";
+import { useNavigate } from "react-router";
 
 export function useBucketAddModal() {
   const [visible, setVisible] = useState(false);
-  const [cb, setCb] = useState<() => void>();
+  const [onFinishCallback, setOnFinishCallback] = useState<() => void>();
+  
   const open = (onFinish?: () => void) => {
     setVisible(true);
-    setCb(onFinish);
+    setOnFinishCallback(() => onFinish);
   };
-  const close = () => setVisible(false);
+  
+  const close = () => {
+    setVisible(false);
+    setOnFinishCallback(undefined);
+  };
 
-  return { visible, open, close, onFinish: cb };
+  return { 
+    visible, 
+    open, 
+    close,
+    onFinish: onFinishCallback 
+  };
 }
 
 export function BucketAddModal({
   visible,
   onFinish,
   close,
+  open,
 }: {
   visible: boolean;
   open: () => void;
@@ -26,13 +38,27 @@ export function BucketAddModal({
   close: () => void;
 }) {
   const [form] = Form.useForm();
-
+  const navigate = useNavigate();
   const { loading, runAsync } = useRequest(
     async (values: any) => {
-      const res = await api.bucket.addBucket(values);
-      onFinish?.();
-      close();
-      return res;
+      try {
+        const res = await api.bucket.addBucket(values);
+        if(res) {
+          message.success("添加成功");
+        }
+        // 先关闭模态框
+        close();
+        // 然后调用 onFinish 回调
+        if (onFinish) {
+          onFinish();
+        } else {
+          navigate(0); // 如果没有回调，刷新页面
+        }
+        return res;
+      } catch (error) {
+        // 如果 API 调用失败，不关闭模态框
+        throw error;
+      }
     },
     { manual: true }
   );

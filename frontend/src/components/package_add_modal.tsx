@@ -28,14 +28,14 @@ export function PackageAddModal({
   const {
     data: bucketOpts,
     loading: bucketLoading,
-    refreshAsync: refreshBucket,
+    refresh: refreshBucket,
   } = useRequest(async () => {
     const res = await api.bucket.listBuckets({ page: 1, page_size: 100 });
     return res.list?.map((item) => ({
       label: item.name,
       value: item.id,
     }));
-  });
+  }, { refreshDeps: [visible] });
   const { runAsync, loading } = useRequest(
     async (values: any) => {
       const { name, bucketId } = values;
@@ -45,13 +45,17 @@ export function PackageAddModal({
       }
       // @ts-ignore
       form.resetFields();
+      navigate(0);// refresh
       close();
     },
     { manual: true }
   );
 
   const showBucket = () => {
-    showAddBucket(refreshBucket);
+    showAddBucket(() => {
+      // 当 bucket 添加成功后，刷新 bucket 列表
+      refreshBucket();
+    });
   };
   return (
     <Modal

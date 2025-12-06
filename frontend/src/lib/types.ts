@@ -135,11 +135,14 @@ export type ObjectInfo = {
   key: string;
   name: string;
   type: string; // "image" or "video"
-  size: number;
+  size: string;
   last_modified: string;
 }
 
 export type BucketObjectListRes = {
   list: ObjectInfo[];
   total: number;
+  nextContinuationToken?: string;
+  hasMore: boolean;
+  subDirectories?: string[];
 }

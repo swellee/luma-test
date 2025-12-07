@@ -4,15 +4,18 @@ import { api } from "@/lib/api";
 
 interface UserStore {
   user: User | null;
+  unreadMsgCount: number;
   setUser: (user: User | null) => void;
   setToken: (token: string | null) => void;
   logout: () => void;
   checkAuthStatus: () => Promise<boolean>;
   refreshData: () => Promise<boolean>;
+  refreshUnreadMsgCount: () => Promise<void>;
 }
 
 export const useUserStore = create<UserStore>((set, get) => ({
   user: null,
+  unreadMsgCount: 0,
   setUser: (user: User | null) => set({ user }),
   setToken: (token) => {
     if (token) {
@@ -42,4 +45,10 @@ export const useUserStore = create<UserStore>((set, get) => ({
     }
     return false;
   },
+  refreshUnreadMsgCount: async () => {
+    const res = await api.msg.getSysMsgUnreadCount();
+    if (res) {
+      set({ unreadMsgCount: res.count });
+    }
+  }
 }));

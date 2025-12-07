@@ -89,6 +89,24 @@ func MarkSysMsgAsRead(c *gin.Context) {
 	utils.ResponseOk(c, gin.H{"message": "操作成功"})
 }
 
+// MarkAllRead 将所有系统消息标记为已读
+func MarkAllRead(c *gin.Context) {
+	userID, exists := c.Get("user_id")
+	if !exists {
+		utils.ResponseErr(c, "用户未认证", http.StatusUnauthorized)
+		return
+	}
+
+	// 将所有未读消息标记为已读
+	err := sysMsgService.MarkAsRead(userID.(int64), nil, "all")
+	if err != nil {
+		utils.ResponseErr(c, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	utils.ResponseOk(c, gin.H{"message": "所有消息已标记为已读"})
+}
+
 // SysMsgStream SSE消息流
 func SysMsgStream(c *gin.Context) {
 	userID, exists := c.Get("user_id")

@@ -2,7 +2,7 @@ import { http } from "../http";
 import { SysMsgListRes, SysMsgUnreadCountRes, CommonRes } from "../types";
 
 export const msg = {
-    getSysMsgList(
+  getSysMsgList(
     params: {
       status?: "read" | "unread";
       page?: number;
@@ -20,4 +20,7 @@ export const msg = {
       data,
     });
   },
-}
+  markAllRead() {
+    return http<CommonRes>("/sysmsg/read/all", { method: "PUT" });
+  },
+};

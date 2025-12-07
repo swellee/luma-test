@@ -11,12 +11,12 @@ import {
   router_reset_password,
   router_dashboard,
   router_dashboard_users,
-  router_dashboard_messages,
   router_dashboard_packages,
   router_dashboard_packages_edit,
   router_dashboard_tasks,
   routr_annotate,
   router_review,
+  router_dashboard_messages,
 } from "./lib/consts";
 import { useUserStore } from "./store/user_store";
 import ErrorBoundary from "antd/es/alert/ErrorBoundary";

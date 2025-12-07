@@ -69,6 +69,7 @@ func SetupRoutes(r *gin.Engine) {
 		protected.GET("/sysmsg/list", api.GetSysMsgList)
 		protected.GET("/sysmsg/unread", api.GetSysMsgUnreadCount)
 		protected.PUT("/sysmsg/read", api.MarkSysMsgAsRead)
+		protected.PUT("/sysmsg/read/all", api.MarkAllRead)
 		protected.GET("/sysmsg/stream", api.SysMsgStream)
 
 		protected.POST("/file", api.UploadFile)

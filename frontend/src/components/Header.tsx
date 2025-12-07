@@ -5,7 +5,6 @@ import {
   apiHost,
   router_login,
   router_profile,
-  router_dashboard_messages,
   router_dashboard,
   default_avatar,
 } from "../lib/consts";
@@ -14,14 +13,12 @@ import "./Header.scss";
 import { useEffect } from "react";
 import { EventSourcePolyfill } from "event-source-polyfill";
 
-import { api } from "@/lib/api";
-import { useRequest } from "ahooks";
 import { cn } from "../lib/util";
 
 const { Header: AntHeader } = Layout;
 
 export default function Header({ className }: { className?: string }) {
-  const { user, logout } = useUserStore();
+  const { user, logout, unreadMsgCount,refreshUnreadMsgCount } = useUserStore();
   const navigate = useNavigate();
   const goLogin = () => {
     navigate(router_login);
@@ -30,10 +27,6 @@ export default function Header({ className }: { className?: string }) {
     logout();
     navigate("/");
   };
-  const { data: unread = { count: 0 }, mutate } = useRequest(
-    api.msg.getSysMsgUnreadCount,
-    { ready: !!user }
-  );
 
   const connectSSE = () => {
     const token = localStorage.getItem("token");
@@ -69,7 +62,7 @@ export default function Header({ className }: { className?: string }) {
           key: Date.now().toString(),
           style: { maxWidth: 360, zIndex: 99999 },
         });
-        mutate({ count: unread.count + 1 });
+        refreshUnreadMsgCount();
       }
     };
 
@@ -100,10 +93,7 @@ export default function Header({ className }: { className?: string }) {
       key: "profile",
       label: <Link to={router_profile}>Profile</Link>,
     },
-    {
-      key: "message",
-      label: <Link to={router_dashboard_messages}>Messages</Link>,
-    },
+   
     {
       key: "logout",
       label: <span onClick={logoutAndGoHome}>Logout</span>,
@@ -136,7 +126,7 @@ export default function Header({ className }: { className?: string }) {
             </Button>
           ) : (
             <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
-              <Badge count={unread.count} size="small" offset={[0, 0]}>
+              <Badge count={unreadMsgCount} size="small" offset={[0, 0]}>
                 <Avatar
                   size="large"
                   className="mr-4 bg-sky-600 cursor-pointer bordered border-green-950/80!"

@@ -18,7 +18,7 @@ export const http = async <T>(
     throw new Error("API_URL is not set");
   }
   const token = localStorage.getItem("token");
-  const url = new URL(apiPath, apiHost);
+  const url = new URL(`${apiHost}${apiPath}`);
   if (options.params) {
     // 过滤掉 undefined 或 null 的字段
     const filteredParams = Object.fromEntries(

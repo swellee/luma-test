@@ -4,3 +4,4 @@
 *.njsproj
 *.sln
 *.sw?
+*/**/.env

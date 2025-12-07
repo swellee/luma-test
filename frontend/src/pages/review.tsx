@@ -4,7 +4,7 @@ import { AnnonatePanel } from "@/components/annonate_panel";
 import { useRequest } from "ahooks";
 import { api } from "@/lib/api";
 import { Spin } from "antd";
-import { ReviewAnnotationReq, SavedAnnotation, TaskStatus } from "@/lib/types";
+import { ReviewAnnotationReq, TaskStatus } from "@/lib/types";
 
 export default function Review() {
   const { id } = useParams();

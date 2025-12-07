@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 修改APP_NAME为云上的应用名
-APP_NAME=anime
+APP_NAME=luma
 
 PROG_NAME=$0
 ACTION=$1

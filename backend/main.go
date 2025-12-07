@@ -69,7 +69,7 @@ func main() {
 
 	// 配置CORS中间件
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"https://api.test.co", "http://localhost:3000"},
+		AllowOrigins:     []string{"https://api.test.co", "http://localhost:3000", "http://106.13.121.206"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},

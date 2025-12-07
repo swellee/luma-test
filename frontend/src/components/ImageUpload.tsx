@@ -111,10 +111,12 @@ const ImageUpload = ({
 
   return (
     <div
-      style={{
-        "--img-upload-width": width + "px",
-        "--img-upload-height": height + "px",
-      }}
+      style={
+        {
+          "--img-upload-width": width + "px",
+          "--img-upload-height": height + "px",
+        } as React.CSSProperties
+      }
     >
       <ImgCrop rotationSlider aspect={aspect} fillColor="transparent">
         <Upload

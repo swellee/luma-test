@@ -10,6 +10,7 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
+remote_server=swellee-test-baidu
 
 # 打印信息的函数
 print_info() {
@@ -65,7 +66,6 @@ package_files() {
     
     # 复制需要的文件
     cp luma deploy_temp/
-    cp config/llm.yml deploy_temp/
     cp run.sh deploy_temp/
     
     # 打包为 tar.gz
@@ -86,10 +86,10 @@ package_files() {
 deploy_to_server() {
     local server_path=${DEPLOY_PATH:-"server"}
     
-    print_info "开始上传文件到服务器 luma-prod"
+    print_info "开始上传文件到服务器 ${remote_server}"
     
     # 上传打包文件
-    scp luma.tar.gz dev-test:server
+    scp luma.tar.gz ${remote_server}:server
     
     if [ $? -ne 0 ]; then
         print_error "文件上传失败"
@@ -100,7 +100,7 @@ deploy_to_server() {
     
     # 在服务器上解压并运行
     print_info "在服务器上解压并部署..."
-    ssh luma-prod "
+    ssh ${remote_server} "
         cd $server_path && \
         tar -xzf luma.tar.gz && \
         chmod +x luma run.sh && \

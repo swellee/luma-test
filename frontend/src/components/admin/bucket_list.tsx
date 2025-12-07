@@ -4,8 +4,9 @@ import { DeleteOutlined } from "@ant-design/icons";
 import { useAntdTable } from "ahooks";
 import { Popconfirm } from "antd";
 import Table from "antd/es/table/Table";
+import { forwardRef, useImperativeHandle } from "react";
 
-export default function AdminBuckets() {
+export const AdminBuckets = forwardRef((_, ref) => {
   const { tableProps, refresh } = useAntdTable(
     async ({ pageSize, current }) => {
       return await api.bucket.listBuckets({
@@ -15,6 +16,9 @@ export default function AdminBuckets() {
     }
   );
 
+  useImperativeHandle(ref, () => {
+    return { refresh };
+  });
   const columns = [
     {
       title: "ID",
@@ -44,11 +48,11 @@ export default function AdminBuckets() {
           title="Are you sure?"
           onConfirm={() => api.bucket.delBucket(record.id).then(refresh)}
         >
-          <DeleteOutlined style={{color: 'red'}}/>
+          <DeleteOutlined style={{ color: "red" }} />
         </Popconfirm>
       ),
     },
   ];
 
   return <Table columns={columns} {...tableProps} rowKey="id" />;
-}
+});

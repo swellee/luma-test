@@ -16,12 +16,12 @@ export default function Register() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [agree, setAgree] = useState(true);
-  const isDev = import.meta.env.MODE === "development";
+  const skipVerify = import.meta.env.VITE_REGISTER_SKIP_VERIFY === "true";
   const allowAdmin = import.meta.env.VITE_ALLOW_ADMIN_REGISTER === "true";
   const { setUser, setToken } = useUserStore((state) => state);
 
   const handleSendCode = async (values: { email: string }) => {
-    if(isDev){
+    if(skipVerify){
       setCurrentStep(2);
       return;
     }

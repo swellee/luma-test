@@ -5,22 +5,25 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 
 export function usePackageAddModal(
-  showAddBucket: (onFinish: () => void) => void
+  showAddBucket: (onFinish: () => void) => void,
+  packagesRef: any
 ) {
   const [visible, setVisible] = useState(false);
   const open = () => setVisible(true);
   const close = () => setVisible(false);
-  return { visible, open, close, showAddBucket };
+  return { visible, open, close, showAddBucket ,packagesRef};
 }
 
 export function PackageAddModal({
   visible,
   close,
   showAddBucket,
+  packagesRef
 }: {
   visible: boolean;
   close: () => void;
   showAddBucket: (onFinish: () => void) => void;
+  packagesRef: any;
 }) {
   const navigate = useNavigate();
   const [form] = Form.useForm();
@@ -45,7 +48,7 @@ export function PackageAddModal({
       }
       // @ts-ignore
       form.resetFields();
-      navigate(0);// refresh
+      packagesRef.current.refresh();
       close();
     },
     { manual: true }

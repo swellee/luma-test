@@ -4,7 +4,6 @@ import { useUserStore } from "@/store/user_store";
 import {
   apiHost,
   router_login,
-  router_profile,
   router_dashboard,
   default_avatar,
 } from "../lib/consts";
@@ -14,12 +13,19 @@ import { useEffect } from "react";
 import { EventSourcePolyfill } from "event-source-polyfill";
 
 import { cn } from "../lib/util";
+import {
+  UpdateProfileModal,
+  useUpdateProfileModal,
+} from "./update_profile_modal";
 
 const { Header: AntHeader } = Layout;
 
 export default function Header({ className }: { className?: string }) {
-  const { user, logout, unreadMsgCount,refreshUnreadMsgCount } = useUserStore();
+  const { user, logout, unreadMsgCount, refreshUnreadMsgCount } =
+    useUserStore();
   const navigate = useNavigate();
+  const editProps = useUpdateProfileModal();
+
   const goLogin = () => {
     navigate(router_login);
   };
@@ -91,9 +97,13 @@ export default function Header({ className }: { className?: string }) {
     },
     {
       key: "profile",
-      label: <Link to={router_profile}>Profile</Link>,
+      label: (
+        <div className="" onClick={editProps.open}>
+          Profile
+        </div>
+      ),
     },
-   
+
     {
       key: "logout",
       label: <span onClick={logoutAndGoHome}>Logout</span>,
@@ -116,13 +126,18 @@ export default function Header({ className }: { className?: string }) {
         </Link>
         {user?.username && (
           <div className="ml-auto text-gray-500">
-            <div >{user?.username}</div>
+            <div>{user?.username}</div>
           </div>
         )}
-        <div className={cn("flex items-center gap-4", user?.username ? "ml-2" : "ml-auto")}>
+        <div
+          className={cn(
+            "flex items-center gap-4",
+            user?.username ? "ml-2" : "ml-auto"
+          )}
+        >
           {!user ? (
             <Button type="text" onClick={goLogin}>
-              登录/注册
+              Login/Register
             </Button>
           ) : (
             <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
@@ -138,6 +153,7 @@ export default function Header({ className }: { className?: string }) {
           )}
         </div>
       </div>
+      <UpdateProfileModal {...editProps} />
     </AntHeader>
   );
 }

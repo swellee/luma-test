@@ -2,7 +2,6 @@ export const apiHost = import.meta.env.VITE_API_HOST;
 
 export const router_register = "/register";
 export const router_login = "/login";
-export const router_profile = "/profile";
 export const router_reset_password = "/reset-password";
 
 export const router_home = "/";

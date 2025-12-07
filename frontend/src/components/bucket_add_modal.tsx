@@ -4,7 +4,7 @@ import { Form, Input, message, Modal } from "antd";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 
-export function useBucketAddModal() {
+export function useBucketAddModal(bucketsRef:any) {
   const [visible, setVisible] = useState(false);
   const [onFinishCallback, setOnFinishCallback] = useState<() => void>();
   
@@ -22,7 +22,8 @@ export function useBucketAddModal() {
     visible, 
     open, 
     close,
-    onFinish: onFinishCallback 
+    onFinish: onFinishCallback,
+    bucketsRef,
   };
 }
 
@@ -31,14 +32,15 @@ export function BucketAddModal({
   onFinish,
   close,
   open,
+  bucketsRef,
 }: {
   visible: boolean;
   open: () => void;
   onFinish?: () => void;
   close: () => void;
+  bucketsRef: any;
 }) {
   const [form] = Form.useForm();
-  const navigate = useNavigate();
   const { loading, runAsync } = useRequest(
     async (values: any) => {
       try {
@@ -52,7 +54,7 @@ export function BucketAddModal({
         if (onFinish) {
           onFinish();
         } else {
-          navigate(0); // 如果没有回调，刷新页面
+          bucketsRef.current?.refresh();
         }
         return res;
       } catch (error) {

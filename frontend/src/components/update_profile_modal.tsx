@@ -58,12 +58,12 @@ export function UpdateProfileModal({
 
   return (
     <Modal
-      title="更新资料"
+      title="Update Profile"
       open={visible}
       onCancel={close}
       onOk={form.submit}
-      okText="保存"
-      cancelText="取消"
+      okText="Save"
+      cancelText="Cancel"
     >
       <Divider />
       <Form
@@ -74,7 +74,7 @@ export function UpdateProfileModal({
       >
         <div className="flex flex-col items-center justify-center">
           <Typography.Title level={3} className="text-center mb-4">
-            头像
+            Avatar
           </Typography.Title>
           <Form.Item name="avatar">
             <ImageUpload
@@ -87,11 +87,11 @@ export function UpdateProfileModal({
           </Form.Item>
         </div>
         <Form.Item
-          label="昵称"
+          label="Nickname"
           name="username"
-          rules={[{ required: true, message: "请输入昵称" }]}
+          rules={[{ required: true, message: "Please enter nickname" }]}
         >
-          <Input placeholder="请输入昵称" />
+          <Input placeholder="Please enter nickname" />
         </Form.Item>
          <Form.Item
               label="Role"

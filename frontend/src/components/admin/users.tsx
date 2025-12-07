@@ -1,12 +1,14 @@
 import { api } from "@/lib/api";
 import { default_avatar } from "@/lib/consts";
 import { User } from "@/lib/types";
+import { useUserStore } from "@/store/user_store";
 import { MoreOutlined } from "@ant-design/icons";
 import { useAntdTable } from "ahooks";
 import { Avatar, Dropdown } from "antd";
 import Table, { ColumnsType } from "antd/es/table";
 
 export default function AdminUsers() {
+  const {user: self} = useUserStore();
   const { tableProps: userTableProps, refresh: refreshUserTable } =
     useAntdTable(async ({ pageSize, current }) => {
       return api.user.getUserList(current, pageSize);
@@ -36,6 +38,7 @@ export default function AdminUsers() {
       title: "Action",
       key: "action",
       render: (item: User) => (
+        item.id === self?.id? "self":
         <Dropdown
           menu={{
             items: [

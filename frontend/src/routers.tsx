@@ -6,7 +6,6 @@ import {
   router_home,
   router_login,
   router_register,
-  router_profile,
   router_terms,
   router_reset_password,
   router_dashboard,
@@ -24,11 +23,12 @@ const Home = lazy(() => import("./pages/home"));
 const Dashboard = lazy(() => import("./pages/dashboard"));
 const DashboardUsers = lazy(() => import("./components/admin/users"));
 const DashboardPackages = lazy(() => import("./pages/dashboard/packages"));
-const DashboardPackageEdit = lazy(() => import("./components/admin/package_edit"));
+const DashboardPackageEdit = lazy(
+  () => import("./components/admin/package_edit")
+);
 const DashboardTasks = lazy(() => import("./pages/dashboard/tasks"));
 const DashboardMessages = lazy(() => import("./pages/dashboard/messages"));
 const Register = lazy(() => import("./pages/register"));
-const Profile = lazy(() => import("./pages/profile"));
 const Login = lazy(() => import("./pages/login"));
 const Annotate = lazy(() => import("./pages/annotate"));
 const Review = lazy(() => import("./pages/review"));
@@ -68,10 +68,7 @@ export const routers = [
     path: router_register,
     element: <AuthGuard element={<Register />} auth={false} />,
   },
-  {
-    path: router_profile,
-    element: <AuthGuard element={<Profile />} auth={true} />,
-  },
+
   {
     path: router_terms,
     element: <Terms />, // no auth guard
@@ -140,7 +137,7 @@ export const AppRouter = () => {
   return (
     <div className="w-screen h-screen">
       <ErrorBoundary
-        description={<Button onClick={reloadPage}>点我刷新</Button>}
+        description={<Button onClick={reloadPage}>Click to refresh</Button>}
       >
         <Suspense
           fallback={

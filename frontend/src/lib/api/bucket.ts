@@ -37,7 +37,7 @@ export const bucket = {
     // todo, 先验证bucket是否存在
     const valid = await checkBucketAccess(bucketReq);
     if (!valid) {
-      message.error("Bucket不存在");
+      message.error("Bucket does not exist");
       return;
     }
     return http<Bucket>("/bucket/add", {
@@ -152,7 +152,7 @@ export const bucket = {
       } as any;
     } catch (error) {
       console.error("Error listing S3 objects:", error);
-      message.error("获取文件列表失败");
+      message.error("Failed to get file list");
       throw error;
     }
   },
@@ -264,7 +264,7 @@ export const bucket = {
       return signedUrl;
     } catch (error) {
       console.error('Error getting S3 object URL:', error);
-      message.error('获取图片URL失败');
+      message.error('Failed to get image URL');
       throw error;
     }
   },

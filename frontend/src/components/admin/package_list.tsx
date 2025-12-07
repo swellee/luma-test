@@ -3,15 +3,20 @@ import { Package, PackageStatus, PackageItem } from "@/lib/types";
 import { MoreOutlined } from "@ant-design/icons";
 import { useAntdTable } from "ahooks";
 import { Dropdown, Table, Tag, Button } from "antd";
+import { forwardRef, useImperativeHandle } from "react";
 import { useNavigate } from "react-router";
 
-export default function AdminPackageList() {
+export const AdminPackageList = forwardRef((_, ref) => {
   const navigate = useNavigate();
   const { tableProps: userTableProps, refresh: refreshUserTable } =
     useAntdTable(async ({ pageSize, current }) => {
       return api.packages.getPackageList(current, pageSize);
     });
-  
+
+  useImperativeHandle(ref, () => {
+    return { refresh: refreshUserTable };
+  });
+
   const handleEdit = (id: number) => {
     navigate(`/dashboard/packages/edit/${id}`);
   };
@@ -45,10 +50,10 @@ export default function AdminPackageList() {
       key: "name",
       dataIndex: "name",
       render: (text: string, record: PackageItem) => (
-        <Button 
-          type="link" 
+        <Button
+          type="link"
           onClick={() => handleEdit(record.id)}
-          style={{ padding: 0, height: 'auto' }}
+          style={{ padding: 0, height: "auto" }}
         >
           {text}
         </Button>
@@ -79,20 +84,20 @@ export default function AdminPackageList() {
               item.status === PackageStatus.PUBLISHED
                 ? []
                 : [
-                    { 
-                      key: "edit", 
+                    {
+                      key: "edit",
                       label: "Edit",
-                      onClick: () => handleEdit(item.id)
+                      onClick: () => handleEdit(item.id),
                     },
-                    { 
-                      key: "publish", 
+                    {
+                      key: "publish",
                       label: "Publish",
-                      onClick: () => handlePublish(item.id)
+                      onClick: () => handlePublish(item.id),
                     },
-                    { 
-                      key: "delete", 
+                    {
+                      key: "delete",
                       label: "Delete",
-                      onClick: () => handleDelete(item.id)
+                      onClick: () => handleDelete(item.id),
                     },
                   ],
           }}
@@ -104,5 +109,5 @@ export default function AdminPackageList() {
     },
   ];
 
-  return <Table columns={columns} {...userTableProps} rowKey="id"/>;
-}
+  return <Table columns={columns} {...userTableProps} rowKey="id" />;
+});

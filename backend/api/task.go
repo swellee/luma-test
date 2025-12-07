@@ -164,3 +164,103 @@ func AssignTask(c *gin.Context) {
 
 	utils.ResponseOk(c, response)
 }
+
+// SaveAnnotation 保存标注数据
+func SaveAnnotation(c *gin.Context) {
+	// 获取当前用户信息
+	userID, exists := c.Get("user_id")
+	if !exists {
+		utils.ResponseErr(c, "用户未登录", http.StatusUnauthorized)
+		return
+	}
+
+	var req models.SavedAnnotationRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		utils.ResponseErr(c, "参数错误: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// 验证用户是否有权限保存该任务的标注
+	// 只有任务的标注员可以保存标注
+	response, err := taskService.SaveAnnotation(req, userID.(int64))
+	if err != nil {
+		utils.ResponseErr(c, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	utils.ResponseOk(c, response)
+}
+
+// ReviewAnnotation 审核标注数据
+func ReviewAnnotation(c *gin.Context) {
+	// 获取当前用户信息
+	userID, exists := c.Get("user_id")
+	if !exists {
+		utils.ResponseErr(c, "用户未登录", http.StatusUnauthorized)
+		return
+	}
+
+	userRole, exists := c.Get("user_role")
+	if !exists {
+		utils.ResponseErr(c, "用户角色未找到", http.StatusUnauthorized)
+		return
+	}
+
+	var req models.ReviewAnnotationReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		utils.ResponseErr(c, "参数错误: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// 验证用户是否有权限审核标注
+	// 只有审核员可以审核标注
+	if userRole != models.RoleReviewer {
+		utils.ResponseErr(c, "只有审核员可以审核标注", http.StatusForbidden)
+		return
+	}
+
+	response, err := taskService.ReviewAnnotation(req, userID.(int64))
+	if err != nil {
+		utils.ResponseErr(c, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	utils.ResponseOk(c, response)
+}
+
+// GetAnnotation 获取标注数据
+func GetAnnotation(c *gin.Context) {
+	// 获取当前用户信息
+	userID, exists := c.Get("user_id")
+	if !exists {
+		utils.ResponseErr(c, "用户未登录", http.StatusUnauthorized)
+		return
+	}
+
+	userRole, exists := c.Get("user_role")
+	if !exists {
+		utils.ResponseErr(c, "用户角色未找到", http.StatusUnauthorized)
+		return
+	}
+
+	// 解析查询参数
+	taskID, err := utils.ParseInt64(c.Query("task_id"))
+	if err != nil {
+		utils.ResponseErr(c, "无效的任务ID", http.StatusBadRequest)
+		return
+	}
+
+	key := c.Query("key")
+	if key == "" {
+		utils.ResponseErr(c, "key参数不能为空", http.StatusBadRequest)
+		return
+	}
+
+	response, err := taskService.GetAnnotationByTaskAndKey(taskID, key, userID.(int64), userRole.(string))
+	if err != nil {
+		utils.ResponseErr(c, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	utils.ResponseOk(c, response)
+}

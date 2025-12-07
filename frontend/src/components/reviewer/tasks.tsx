@@ -1,10 +1,14 @@
 import { api } from "@/lib/api";
 import { Task, TaskStatus } from "@/lib/types";
 import { useAntdTable } from "ahooks";
-import { Button, Table, Tag, message, Space, Modal, Radio, Tabs } from "antd";
+import { Button, Table, Tag, message, Space, Modal, Radio, Tabs, Popconfirm } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useState } from "react";
 import { useUserStore } from "@/store/user_store";
+import { EditOutlined, CheckOutlined, CloseOutlined } from "@ant-design/icons";
+import { router_review } from "@/lib/consts";
+import { useNavigate } from "react-router";
+import { getStatusTag } from "@/lib/util";
 
 export default function ReviewerTasks() {
   const { user } = useUserStore();
@@ -84,19 +88,33 @@ export default function ReviewerTasks() {
     }
   };
 
-  // 任务状态标签颜色
-  const getStatusTag = (status: TaskStatus) => {
-    const statusConfig: Record<TaskStatus, { color: string; text: string }> = {
-      [TaskStatus.created]: { color: "blue", text: "Created" },
-      [TaskStatus.processing]: { color: "orange", text: "Processing" },
-      [TaskStatus.processed]: { color: "purple", text: "Processed" },
-      [TaskStatus.approved]: { color: "green", text: "Approved" },
-      [TaskStatus.rejected]: { color: "red", text: "Rejected" },
-    };
-    const config = statusConfig[status];
-    return <Tag color={config.color}>{config.text}</Tag>;
-  };
 
+  const navigate = useNavigate();
+  const handleEdit = (task: Task) => navigate(router_review.replace(":id",task.id.toString()))
+  const handleApprove = async(task: Task) =>{
+    try {
+      await api.task.updateTaskStatus({
+        task_id: task.id,
+        status: TaskStatus.approved,
+      });
+      message.success("Task completed successfully");
+      refreshMyTasks();
+    } catch (error) {
+      message.error("Failed to complete task");
+    }
+  }
+  const handleReject = async(task: Task) =>{
+    try {
+      await api.task.updateTaskStatus({
+        task_id: task.id,
+        status: TaskStatus.rejected,
+      });
+      message.success("Task rejected successfully");
+      refreshMyTasks();
+    } catch (error) {
+      message.error("Failed to reject task");
+    }
+  }
   // 可领取任务的列
   const availableColumns: ColumnsType<Task> = [
     {
@@ -199,6 +217,55 @@ export default function ReviewerTasks() {
         </Space>
       ),
     },
+    {
+      title: "Actions",
+      key: "actions",
+      width: 150,
+      render: (_, record: Task) => (
+        <span>
+          <Button
+            icon={<EditOutlined />}
+            size="small"
+            disabled={record.status !== TaskStatus.reviewing}
+            onClick={() => handleEdit(record)}
+          />
+          <Popconfirm
+            title={
+              <div className="w-50">
+                Are you sure you want to mark this task as approved? you
+                will no longer to edit it then
+              </div>
+            }
+            onConfirm={() => handleApprove(record)}
+          >
+            <Button
+              disabled={record.status !== TaskStatus.reviewing}
+              icon={<CheckOutlined />}
+              className="ml-4"
+              size="small"
+              danger
+            />
+          </Popconfirm>
+          <Popconfirm
+            title={
+              <div className="w-50">
+                Are you sure you want to mark this task as rejected? you
+                will no longer to edit it then
+              </div>
+            }
+            onConfirm={() => handleReject(record)}
+          >
+            <Button
+              disabled={record.status !== TaskStatus.reviewing}
+              icon={<CloseOutlined />}
+              className="ml-4"
+              size="small"
+              danger
+            />
+          </Popconfirm>
+        </span>
+      ),
+    },
   ];
 
   return (
@@ -268,3 +335,4 @@ export default function ReviewerTasks() {
     </div>
   );
 }
+

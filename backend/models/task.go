@@ -88,3 +88,48 @@ type TaskWipUpdateRequest struct {
 type TaskClaimRequest struct {
 	TaskID int64 `json:"task_id" binding:"required"`
 }
+
+// MarkData 标记数据
+type MarkData struct {
+	Type string `json:"type" binding:"required"` // "rect", "circle", "polygon"
+	Data any    `json:"data" binding:"required"`
+}
+
+// ReviewInfo 审核信息
+type ReviewInfo struct {
+	Score      int    `json:"score"`      // 0-5
+	Comment    string `json:"comment"`    // 审核意见
+	ReviewerID int64  `json:"reviewerId"` // 审核员用户ID
+	ReviewedAt string `json:"reviewedAt"` // 审核时间
+}
+
+// SavedAnnotation 保存的标注数据
+type SavedAnnotation struct {
+	ID     int64  `xorm:"pk autoincr 'id'" json:"id,omitempty"`
+	TaskID int64  `xorm:"'task_id' not null" json:"taskId" binding:"required"`
+	Key    string `xorm:"varchar(500) 'key' not null" json:"key" binding:"required"` // S3 object key
+	Meta   struct {
+		BucketID int64      `json:"bucketId" binding:"required"`
+		Marks    []MarkData `json:"marks" binding:"required"`
+	} `xorm:"json 'meta'" json:"meta" binding:"required"`
+	Review    *ReviewInfo `xorm:"json 'review'" json:"review,omitempty"` // 审核信息，可选
+	CreatedAt time.Time   `xorm:"created 'created_at'" json:"created_at"`
+	UpdatedAt time.Time   `xorm:"updated 'updated_at'" json:"updated_at"`
+}
+
+// SavedAnnotationRequest 保存标注请求
+type SavedAnnotationRequest struct {
+	TaskID int64  `json:"taskId" binding:"required"`
+	Key    string `json:"key" binding:"required"`
+	Meta   struct {
+		BucketID int64      `json:"bucketId" binding:"required"`
+		Marks    []MarkData `json:"marks" binding:"required"`
+	} `json:"meta" binding:"required"`
+}
+
+// ReviewAnnotationReq 审核标注请求
+type ReviewAnnotationReq struct {
+	AnnotationID int64  `json:"annotationId" binding:"required"`
+	Score        int    `json:"score" binding:"required,min=0,max=5"`
+	Comment      string `json:"comment"`
+}

@@ -1,13 +1,12 @@
 import { api } from "@/lib/api";
 import { Task, TaskStatus } from "@/lib/types";
 import { useAntdTable } from "ahooks";
-import { Button, Table, Tag, message, Space, Modal, Select } from "antd";
+import { Button, Table, message, Space, Modal, Select } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useState } from "react";
-import { useUserStore } from "@/store/user_store";
+import { getStatusTag } from "@/lib/util";
 
 export default function AdminTasks() {
-  const { user } = useUserStore();
   const [assignModalVisible, setAssignModalVisible] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [assignUserId, setAssignUserId] = useState<number | null>(null);
@@ -67,19 +66,6 @@ export default function AdminTasks() {
     } catch (error) {
       message.error("Failed to assign task");
     }
-  };
-
-  // 任务状态标签颜色
-  const getStatusTag = (status: TaskStatus) => {
-    const statusConfig: Record<TaskStatus, { color: string; text: string }> = {
-      [TaskStatus.created]: { color: "blue", text: "Created" },
-      [TaskStatus.processing]: { color: "orange", text: "Processing" },
-      [TaskStatus.processed]: { color: "purple", text: "Processed" },
-      [TaskStatus.approved]: { color: "green", text: "Approved" },
-      [TaskStatus.rejected]: { color: "red", text: "Rejected" },
-    };
-    const config = statusConfig[status];
-    return <Tag color={config.color}>{config.text}</Tag>;
   };
 
   const columns: ColumnsType<Task> = [

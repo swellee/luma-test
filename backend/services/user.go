@@ -220,6 +220,7 @@ func (us *UserService) UpdateProfile(userID int64, req *models.UserUpdateReq) (*
 		Username:  user.Username,
 		Email:     user.Email,
 		Avatar:    user.Avatar,
+		Role:      user.Role,
 		CreatedAt: user.CreatedAt,
 	}
 	return response, nil

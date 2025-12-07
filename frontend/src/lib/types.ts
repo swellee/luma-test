@@ -47,6 +47,7 @@ export enum TaskStatus {
   created = "created",
   processing = "processing",
   processed = "processed",
+  reviewing = "reviewing",
   approved = "approved",
   rejected = "rejected",
 }
@@ -150,4 +151,32 @@ export type BucketObjectListRes = {
   nextContinuationToken?: string;
   hasMore: boolean;
   subDirectories?: string[];
+}
+
+
+// 标记数据类型
+export type MarkData ={
+  type: "rect" | "circle" | "polygon";
+  data: any;
+}
+
+export type SavedAnnotation = {
+  id?:number;
+  taskId: number;
+  key: string;
+  meta: {
+    bucketId: number;
+    marks: MarkData[];
+  };
+  review?: {
+    score: number; // 0-5
+    comment: string;
+    reviewerId: number; // reviewer user id
+    reviewedAt: string; // ISO 8601
+  }
+}
+export type ReviewAnnotationReq = {
+  annotationId: number;
+  score: number;
+  comment: string;
 }

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
 
 	"luma-ai-backend/config"
 	"luma-ai-backend/models"
@@ -302,12 +303,12 @@ func (ts *TaskService) UpdateTaskStatusWithValidation(taskID, userID int64, user
 	switch userRole {
 	case models.RoleAnnotator:
 		// annotator 只能将任务状态从 created 变为 processed
-		if task.Status != models.TaskStatusCreated || newStatus != models.TaskStatusProcessed {
-			return nil, errors.New("标注员只能将 created 状态的任务变为 processed")
+		if task.Status != models.TaskStatusProcessing || newStatus != models.TaskStatusProcessed {
+			return nil, errors.New("标注员只能将 processing 状态的任务变为 processed")
 		}
 	case models.RoleReviewer:
 		// reviewer 只能将 processed 状态的任务变为 approved 或 rejected
-		if task.Status != models.TaskStatusProcessed || (newStatus != models.TaskStatusApproved && newStatus != models.TaskStatusRejected) {
+		if task.Status != models.TaskStatusReviewing || (newStatus != models.TaskStatusApproved && newStatus != models.TaskStatusRejected) {
 			return nil, errors.New("审核员只能将 processed 状态的任务变为 approved 或 rejected")
 		}
 	case models.RoleAdmin:
@@ -482,17 +483,17 @@ func (ts *TaskService) AssignTaskWithNotification(taskID, userID, adminID int64)
 	}
 
 	// 只有管理员可以重新分配任务
-	// 这里假设调用者已经验证了用户角色
-
 	// 根据用户角色分配任务
 	// 这里需要知道用户角色，但API没有传递，暂时根据任务状态判断
 	// 在实际应用中，应该传递用户角色信息
-	if task.Status == models.TaskStatusCreated || task.Status == models.TaskStatusProcessing {
+	if user.Role == models.RoleAnnotator {
 		// 分配给标注员
 		task.Annotator = userID
-	} else if task.Status == models.TaskStatusProcessed {
+		task.Status = models.TaskStatusProcessing
+	} else if user.Role == models.RoleReviewer {
 		// 分配给审核员
 		task.Reviewer = userID
+		task.Status = models.TaskStatusReviewing
 	}
 
 	_, err = config.DB.ID(taskID).Update(task)
@@ -524,7 +525,165 @@ func (ts *TaskService) AssignTaskWithNotification(taskID, userID, adminID int64)
 	}, nil
 }
 
-// AssignTask 分配任务给用户（兼容旧版本）
-func (ts *TaskService) AssignTask(taskID int64, userID int64) (*models.TaskResponse, error) {
-	return ts.AssignTaskWithNotification(taskID, userID, 0)
+// SaveAnnotation 保存标注数据
+func (ts *TaskService) SaveAnnotation(req models.SavedAnnotationRequest, userID int64) (*models.SavedAnnotation, error) {
+	// 获取任务信息
+	task := &models.Task{}
+	has, err := config.DB.ID(req.TaskID).Get(task)
+	if err != nil {
+		return nil, err
+	}
+	if !has {
+		return nil, errors.New("任务不存在")
+	}
+
+	// 验证用户是否有权限保存该任务的标注
+	// 只有任务的标注员可以保存标注
+	if task.Annotator != userID {
+		return nil, errors.New("只有任务的标注员可以保存标注")
+	}
+
+	// 检查任务状态是否允许保存标注
+	if task.Status != models.TaskStatusProcessing {
+		return nil, errors.New("只有 processing 状态的任务可以保存标注")
+	}
+
+	// 检查是否已存在相同 key 的标注
+	existingAnnotation := &models.SavedAnnotation{}
+	has, err = config.DB.Where("task_id = ? AND `key` = ?", req.TaskID, req.Key).Get(existingAnnotation)
+	if err != nil {
+		return nil, err
+	}
+
+	// 创建或更新标注数据
+	annotation := &models.SavedAnnotation{
+		TaskID: req.TaskID,
+		Key:    req.Key,
+		Meta:   req.Meta,
+	}
+
+	if has {
+		// 更新现有标注
+		annotation.ID = existingAnnotation.ID
+		_, err = config.DB.ID(annotation.ID).Update(annotation)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		// 创建新标注
+		_, err = config.DB.Insert(annotation)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// 获取完整的标注数据（包含创建时间等）
+	fullAnnotation := &models.SavedAnnotation{}
+	has, err = config.DB.ID(annotation.ID).Get(fullAnnotation)
+	if err != nil {
+		return nil, err
+	}
+	if !has {
+		return nil, errors.New("保存标注后获取数据失败")
+	}
+
+	return fullAnnotation, nil
+}
+
+// ReviewAnnotation 审核标注数据
+func (ts *TaskService) ReviewAnnotation(req models.ReviewAnnotationReq, userID int64) (*models.SavedAnnotation, error) {
+	// 获取标注信息
+	annotation := &models.SavedAnnotation{}
+	has, err := config.DB.ID(req.AnnotationID).Get(annotation)
+	if err != nil {
+		return nil, err
+	}
+	if !has {
+		return nil, errors.New("标注不存在")
+	}
+
+	// 获取任务信息
+	task := &models.Task{}
+	has, err = config.DB.ID(annotation.TaskID).Get(task)
+	if err != nil {
+		return nil, err
+	}
+	if !has {
+		return nil, errors.New("任务不存在")
+	}
+
+	// 验证用户是否有权限审核该任务的标注
+	// 只有任务的审核员可以审核标注
+	if task.Reviewer != userID {
+		return nil, errors.New("只有任务的审核员可以审核标注")
+	}
+
+	// 检查任务状态是否允许审核标注
+	if task.Status != models.TaskStatusReviewing {
+		return nil, errors.New("只有 reviewing 状态的任务可以审核标注")
+	}
+
+	// 创建审核信息
+	reviewInfo := &models.ReviewInfo{
+		Score:      req.Score,
+		Comment:    req.Comment,
+		ReviewerID: userID,
+		ReviewedAt: time.Now().Format(time.RFC3339),
+	}
+
+	// 更新标注的审核信息
+	annotation.Review = reviewInfo
+	_, err = config.DB.ID(annotation.ID).Update(annotation)
+	if err != nil {
+		return nil, err
+	}
+
+	// 获取完整的标注数据（包含审核信息等）
+	fullAnnotation := &models.SavedAnnotation{}
+	has, err = config.DB.ID(annotation.ID).Get(fullAnnotation)
+	if err != nil {
+		return nil, err
+	}
+	if !has {
+		return nil, errors.New("审核标注后获取数据失败")
+	}
+
+	return fullAnnotation, nil
+}
+
+// GetAnnotationByTaskAndKey 根据任务ID和key获取标注数据
+func (ts *TaskService) GetAnnotationByTaskAndKey(taskID int64, key string, userID int64, userRole string) (*models.SavedAnnotation, error) {
+	// 获取任务信息
+	task := &models.Task{}
+	has, err := config.DB.ID(taskID).Get(task)
+	if err != nil {
+		return nil, err
+	}
+	if !has {
+		return nil, errors.New("任务不存在")
+	}
+
+	// 验证用户是否有权限查看该任务的标注
+	// 管理员可以查看所有标注
+	if userRole == models.RoleAdmin {
+		// 管理员可以查看，继续执行
+	} else if userRole == models.RoleAnnotator && task.Annotator == userID {
+		// 标注员可以查看自己任务的标注
+	} else if userRole == models.RoleReviewer && task.Reviewer == userID {
+		// 审核员可以查看自己任务的标注
+	} else {
+		return nil, errors.New("没有权限查看该任务的标注")
+	}
+
+	// 获取标注信息
+	annotation := &models.SavedAnnotation{}
+	has, err = config.DB.Where("task_id = ? AND `key` = ?", taskID, key).Get(annotation)
+	if err != nil {
+		return nil, err
+	}
+	if !has {
+		return nil, errors.New("标注不存在")
+	}
+
+	return annotation, nil
 }

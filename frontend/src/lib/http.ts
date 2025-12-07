@@ -6,6 +6,7 @@ type HttpOptions = {
   params?: Record<string, any>;
   data?: Record<string, any> | FormData;
   headers?: Record<string, string>;
+  showError?: boolean;
 };
 
 export const http = async <T>(
@@ -27,9 +28,9 @@ export const http = async <T>(
   }
 
   const isFormData = options.data instanceof FormData;
-
+  const {showError, ...restOptions} = options;
   const res = await fetch(url, {
-    ...options,
+    ...restOptions,
     body: options.data
       ? isFormData
         ? (options.data as FormData)
@@ -51,7 +52,9 @@ export const http = async <T>(
         window.location.href = router_login;
       }
     }
-    message.error(response.error);
+    if (showError) {
+      message.error(response.error);
+    }
     throw new Error(response.error);
   }
   return response.data as T;

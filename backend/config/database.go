@@ -80,10 +80,11 @@ func InitRedis() {
 func syncDatabase(engine *xorm.Engine) {
 	tables := []interface{}{
 		new(models.User),
-		new(models.SysMsg),  // 添加系统消息表
-		new(models.Bucket),  // 添加存储桶表
-		new(models.Package), // 添加包表
-		new(models.Task),    // 添加任务表
+		new(models.SysMsg),          // 添加系统消息表
+		new(models.Bucket),          // 添加存储桶表
+		new(models.Package),         // 添加包表
+		new(models.Task),            // 添加任务表
+		new(models.SavedAnnotation), // 添加标注
 	}
 
 	tableNames := []string{
@@ -92,6 +93,7 @@ func syncDatabase(engine *xorm.Engine) {
 		"存储桶",
 		"包",
 		"任务",
+		"标注",
 	}
 
 	for i, table := range tables {

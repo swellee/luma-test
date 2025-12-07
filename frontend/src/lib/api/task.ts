@@ -8,7 +8,9 @@ import {
   TaskAssignRequest,
   CommonRes,
   Task,
-  TaskWipUpdateRequest
+  TaskWipUpdateRequest,
+  SavedAnnotation,
+  ReviewAnnotationReq
 } from "../types"
 
 export const task = {
@@ -74,5 +76,28 @@ export const task = {
       method: 'POST',
       data
     })
+  },
+
+  saveAnnotation(data: SavedAnnotation){
+    return http<SavedAnnotation>('/task/annotation', {
+      method: 'POST',
+      data
+    })
+  },
+  getAnnotation(task_id: number, key: string){
+    return http<SavedAnnotation>(`/task/annotation`, {
+      method: 'GET',
+      params: {
+        task_id,
+        key
+      }
+    })
+  },
+  saveReview(data: ReviewAnnotationReq){
+    return http<SavedAnnotation>('/task/annotation/review', {
+      method: 'PUT',
+      data
+    })
   }
+
 }

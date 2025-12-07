@@ -7,16 +7,18 @@ import {
   Tag,
   message,
   Space,
-  Modal,
   Tabs,
-  Dropdown,
   Popconfirm,
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useUserStore } from "@/store/user_store";
-import { CheckSquareFilled, PlayCircleTwoTone } from "@ant-design/icons";
+import {
+  CheckOutlined,
+  EditOutlined,
+} from "@ant-design/icons";
 import { useNavigate } from "react-router";
 import { routr_annotate } from "@/lib/consts";
+import { getStatusTag } from "@/lib/util";
 
 export default function AnnotatorTasks() {
   const { user } = useUserStore();
@@ -68,7 +70,7 @@ export default function AnnotatorTasks() {
   };
 
   const handleProceedTask = async (task: Task) => {
-    navigate(routr_annotate.replace(':id', task.id.toString()));
+    navigate(routr_annotate.replace(":id", task.id.toString()));
   };
 
   // 确认完成任务
@@ -83,19 +85,6 @@ export default function AnnotatorTasks() {
     } catch (error) {
       message.error("Failed to complete task");
     }
-  };
-
-  // 任务状态标签颜色
-  const getStatusTag = (status: TaskStatus) => {
-    const statusConfig: Record<TaskStatus, { color: string; text: string }> = {
-      [TaskStatus.created]: { color: "blue", text: "Created" },
-      [TaskStatus.processing]: { color: "orange", text: "Processing" },
-      [TaskStatus.processed]: { color: "purple", text: "Processed" },
-      [TaskStatus.approved]: { color: "green", text: "Approved" },
-      [TaskStatus.rejected]: { color: "red", text: "Rejected" },
-    };
-    const config = statusConfig[status];
-    return <Tag color={config.color}>{config.text}</Tag>;
   };
 
   // 可领取任务的列
@@ -189,15 +178,27 @@ export default function AnnotatorTasks() {
       render: (_, record: Task) => (
         <span>
           <Button
-            icon={<PlayCircleTwoTone />}
+            icon={<EditOutlined />}
             size="small"
+            disabled={record.status !== TaskStatus.processing}
             onClick={() => handleProceedTask(record)}
           />
           <Popconfirm
-            title="Are you sure you want to mark this task as completed? This task will go to reviewers"
+            title={
+              <div className="w-50">
+                Are you sure you want to mark this task as completed? you
+                will no longer to edit it then
+              </div>
+            }
             onConfirm={() => handleConfirmComplete(record)}
           >
-            <Button icon={<CheckSquareFilled />} size="small" danger />
+            <Button
+              disabled={record.status !== TaskStatus.processing}
+              icon={<CheckOutlined />}
+              className="ml-4"
+              size="small"
+              danger
+            />
           </Popconfirm>
         </span>
       ),

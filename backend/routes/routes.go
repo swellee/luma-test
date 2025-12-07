@@ -61,6 +61,9 @@ func SetupRoutes(r *gin.Engine) {
 		protected.PUT("/task/status", api.UpdateTaskStatus)
 		protected.PUT("/task/wip", api.UpdateTaskWipIdx)
 		protected.POST("/task/assign", api.AssignTask)
+		protected.POST("/task/annotation", api.SaveAnnotation)
+		protected.GET("/task/annotation", api.GetAnnotation)
+		protected.PUT("/task/annotation/review", api.ReviewAnnotation)
 
 		// 系统消息相关
 		protected.GET("/sysmsg/list", api.GetSysMsgList)

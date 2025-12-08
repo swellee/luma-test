@@ -318,6 +318,17 @@ func (ts *TaskService) UpdateTaskStatusWithValidation(taskID, userID int64, user
 		return nil, errors.New("用户角色无效")
 	}
 
+	if newStatus == models.TaskStatusProcessed {
+		//检查是否每一项都有标注
+		annotationCount, _ := config.DB.Where("task_id = ?", taskID).Count(&models.SavedAnnotation{})
+		pack := &models.Package{}
+		if _, err = config.DB.Where("id = ?", task.PackageID).Cols("items").Get(pack); err != nil {
+			return nil, err
+		}
+		if annotationCount != int64(len(pack.Items)) {
+			return nil, errors.New("未完成所有标注")
+		}
+	}
 	// 保存旧状态用于消息生成
 	oldStatus := task.Status
 

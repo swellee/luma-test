@@ -30,10 +30,7 @@ export default function AdminPackages() {
           type="primary"
           className="ml-2"
           onClick={() => {
-            packageModalProps.open().then(() => {
-              // refresh packages
-              packagesRef.current?.refresh();
-            });
+            packageModalProps.open();
           }}
         >
           add package

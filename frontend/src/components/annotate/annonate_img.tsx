@@ -198,6 +198,7 @@ export const AnnonateImg = forwardRef(
 
         img.onload = () => {
           setPreloading(false);
+          cacheTool.set(nextUrl + "_image", img);
         };
 
         img.onerror = () => {

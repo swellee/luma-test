@@ -68,7 +68,7 @@ export function PackageAddModal({
       const { name, bucketId } = values;
       const res = await api.packages.savePackage({ name, bucketId, items: [] });
       if (res?.id) {
-        navigate(res.id);
+        navigate("edit/"+res.id);
         onResolve?.();
       } else {
         onReject?.();

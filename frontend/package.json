@@ -16,6 +16,7 @@
     "@tailwindcss/vite": "^4.1.17",
     "@types/event-source-polyfill": "^1.0.5",
     "@types/md5": "^2.3.6",
+    "@types/video.js": "^7.3.58",
     "ahooks": "^3.9.6",
     "antd": "^6.0.1",
     "antd-img-crop": "^4.27.0",
@@ -29,6 +30,7 @@
     "react-router": "^7.10.0",
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^4.1.17",
+    "video.js": "^8.23.4",
     "zustand": "^5.0.9"
   },
   "devDependencies": {

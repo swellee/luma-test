@@ -142,7 +142,7 @@ export const AnnonatePanel = ({
     if (testImg) {
       return fileType === "image"
         ? "https://gips1.baidu.com/it/u=1647344915,1746921568&fm=3028&app=3028&f=JPEG&fmt=auto?w=720&h=1280"
-        : "https://haokan.baidu.com/v?vid=5830848012729960423";
+        : "https://vjs.zencdn.net/v/oceans.mp4";
     } else {
       if (!bucketInfo) throw new Error("Bucket 信息未加载");
       const cachedUrl = cacheTool.get(key);

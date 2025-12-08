@@ -95,7 +95,7 @@ export default function Dashboard() {
         <aside>
           <Menu
             onClick={onClickNav}
-            defaultSelectedKeys={[navMenuItems[0].key]}
+            defaultSelectedKeys={[navMenuItems?.[0]?.key]}
             defaultOpenKeys={["sub1"]}
             mode="inline"
             className="p-4! border-r-0! h-full"

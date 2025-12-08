@@ -36,7 +36,7 @@ import Icon, {
   ClearOutlined,
   EyeFilled,
 } from "@ant-design/icons";
-import { cn } from "@/lib/util";
+import { cacheTool, cn } from "@/lib/util";
 import { useKeyPress } from "ahooks";
 
 interface AnnonateVideoProps {
@@ -92,8 +92,6 @@ export const AnnonateVideo = forwardRef(
 
     // 初始化 video.js 播放器
     useEffect(() => {
-      if (!containerRef.current || !currentUrl) return;
-
       // Make sure Video.js player is only initialized once
       if (!playerRef.current) {
         // The Video.js player needs to be _inside_ the component el for React 18 Strict Mode.
@@ -111,7 +109,7 @@ export const AnnonateVideo = forwardRef(
             fluid: true,
             sources: [
               {
-                src: currentUrl,
+                src: "",
                 type: "video/mp4",
               },
             ],
@@ -155,21 +153,16 @@ export const AnnonateVideo = forwardRef(
             playerRef.current = null;
           }
         };
-      } else {
-        const player = playerRef.current;
-        setDuration(0);
-        player.autoplay(true);
-        player.src(currentUrl);
       }
+    }, []);
+    useEffect(() => {
+      if (!containerRef.current || !currentUrl) return;
+      const player = playerRef.current;
+      setDuration(0);
+      player.autoplay(true);
+      player.src(currentUrl);
+      containerRef?.current?.focus();
     }, [currentUrl]);
-
-    useKeyPress("space", () => {
-      if (!isPlaying) {
-        playerRef.current?.play();
-      } else {
-        playerRef.current?.pause();
-      }
-    });
 
     // 加载已保存的标注数据
     useEffect(() => {
@@ -190,6 +183,26 @@ export const AnnonateVideo = forwardRef(
       }
     }, [curAnnotation]);
 
+    useEffect(() => {
+      if (nextUrl) {
+        const cachedVideo = cacheTool.get(nextUrl + "_video");
+        if (cachedVideo) {
+          // 已经缓存，无需预加载
+          return;
+        }
+        const video = document.createElement("video");
+        video.crossOrigin = "anonymous";
+        video.preload = "metadata";
+        video.onloadedmetadata = () => {
+          // cacheTool.set(nextUrl + "_video", video);
+        };
+        video.onerror = () => {
+          console.warn(`预加载视频失败: ${nextUrl}`);
+        };
+        video.src = nextUrl;
+      }
+    }, [nextUrl]);
+
     // 暴露方法给父组件
     useImperativeHandle(ref, () => ({
       getAnnotationMeta: (bucketId: number) => ({
@@ -202,7 +215,6 @@ export const AnnonateVideo = forwardRef(
       }),
       clearMarks: () => {
         setSegments([]);
-        message.success("已清除所有切片");
       },
     }));
 
@@ -258,6 +270,10 @@ export const AnnonateVideo = forwardRef(
         playerRef.current.play();
       }
     };
+    useKeyPress("space", (e) => {
+      e.preventDefault();
+      togglePlay();
+    });
 
     // 时间轴鼠标移动
     const handleTimelineMouseMove = useCallback(
@@ -294,14 +310,13 @@ export const AnnonateVideo = forwardRef(
           id: `segment-${Date.now()}`,
           start,
           end,
-          text: `切片 ${segments.length + 1}`,
+          text: `cut ${segments.length + 1}`,
           color: "#8b5cf6", // 紫色
         };
         setSegments([...segments, newSegment]);
         setTempStart(null);
         setTempEnd(null);
         setIsCreating(false);
-        message.success("切片已创建");
       }
     }, [viewMode, duration, hoverTime, isCreating, tempStart, segments]);
 
@@ -379,8 +394,8 @@ export const AnnonateVideo = forwardRef(
       <div className="flex-1 flex gap-4">
         {/* 左侧视频播放器 */}
         <div className="relative flex-1 flex flex-col rounded-2xl bg-black p-4">
-          <div data-vjs-player ref={containerRef} className="flex-1">
-            <div ref={videoRef} />
+          <div data-vjs-player ref={containerRef} className="flex-1 max-h-[calc(100vh-366px)] overflow-hidden">
+            <div ref={videoRef}  />
           </div>
 
           {/* 时间轴和切片可视化 */}
@@ -395,9 +410,7 @@ export const AnnonateVideo = forwardRef(
                 type="text"
                 className="mr-auto"
               />
-              <Spin
-                spinning={duration === 0}
-              />
+              <Spin spinning={duration === 0} />
 
               <span className="text-gray-400">
                 {formatTime(currentTime)} / {formatTime(duration)}
@@ -433,14 +446,13 @@ export const AnnonateVideo = forwardRef(
             {segments.map((segment) => (
               <div
                 key={segment.id}
-                className="absolute h-6 bg-purple-600 opacity-70 cursor-move border border-purple-300 rounded"
+                className="absolute cursor-auto h-6 bg-purple-600 opacity-70 border border-purple-300 rounded"
                 style={{
                   left: `${(segment.start / duration) * 100}%`,
                   width: `${((segment.end - segment.start) / duration) * 100}%`,
                   top: "4px",
                 }}
-                onClick={(e) => e.stopPropagation()}
-                onMouseDown={(e) => handleSegmentMouseDown(e, segment)}
+                onClick={(e) => handleSegmentMouseDown(e, segment)}
               >
                 {/* 左侧拖动柄 */}
                 <div
@@ -470,7 +482,7 @@ export const AnnonateVideo = forwardRef(
             )}
           </div>
           <div className="text-xs text-gray-400 mt-2">
-            提示：鼠标悬停在时间轴上显示十字图标，点击第一下设置开始，第二下设置结束
+            提示：{viewMode? "审核模式下无法编辑切片":"鼠标悬停在时间轴上显示十字图标，点击第一下设置开始，第二下设置结束"}
           </div>
         </div>
 
@@ -490,9 +502,7 @@ export const AnnonateVideo = forwardRef(
             </div>
 
             {segments.length === 0 ? (
-              <div className="text-gray-500 text-center py-8">
-                No cuts yet
-              </div>
+              <div className="text-gray-500 text-center py-8">No cuts yet</div>
             ) : (
               <div className="overflow-y-auto h-full">
                 <List

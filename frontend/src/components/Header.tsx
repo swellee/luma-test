@@ -113,7 +113,7 @@ export default function Header({ className }: { className?: string }) {
   return (
     <AntHeader
       className={cn(
-        "w-screen overflow-x-hidden border-b p-2! bg-black! h-14 flex items-center",
+        "w-screen overflow-x-hidden border-b p-2! bg-black! h-14 shrink-0 flex items-center",
         className
       )}
     >

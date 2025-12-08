@@ -278,7 +278,7 @@ export const AnnonatePanel = ({
         />
       )}
       {/* 控制栏 */}
-      <Card>
+      <Card className="shrink-0">
         <div className="flex items-center justify-between">
           <div>
             <Button

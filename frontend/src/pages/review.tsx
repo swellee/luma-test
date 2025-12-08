@@ -31,9 +31,8 @@ export default function Review() {
     api.task.updateTaskStatus({ task_id: +id!, status });
   };
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex h-screen flex-col gap-4">
       <Header />
-      <main>
         {!pageData?.package ? (
           <Spin spinning />
         ) : (
@@ -48,7 +47,6 @@ export default function Review() {
             description="mark all the birds in the picture"
           />
         )}
-      </main>
     </div>
   );
 }

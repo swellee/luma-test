@@ -1,6 +1,6 @@
 import { useParams } from "react-router";
 import Header from "../components/Header";
-import { AnnonatePanel } from "@/components/annonate_panel";
+import { AnnonatePanel } from "@/components/annotate/annonate_panel";
 import { useRequest } from "ahooks";
 import { api } from "@/lib/api";
 import { Spin } from "antd";

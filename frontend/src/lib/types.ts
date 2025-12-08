@@ -159,6 +159,9 @@ export type MarkData ={
   type: "rect" | "circle" | "polygon";
   data: any;
 }
+export type VideoMarkData = {
+  data: any;
+}
 
 export type SavedAnnotation = {
   id?:number;
@@ -166,7 +169,7 @@ export type SavedAnnotation = {
   key: string;
   meta: {
     bucketId: number;
-    marks: MarkData[];
+    marks: (MarkData| VideoMarkData)[];
   };
   review?: {
     score: number; // 0-5

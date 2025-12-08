@@ -1,5 +1,6 @@
 import { message } from "antd";
 import { http } from "../http";
+import { getFileType } from "../util";
 import {
   Bucket,
   BucketAccess,
@@ -65,25 +66,6 @@ export const bucket = {
       // 创建S3客户端
       const s3 = getS3(bucketInfo.region, bucketInfo.access);
 
-      // 定义图片和视频扩展名
-      const imageExtensions = new Set([
-        ".jpg",
-        ".jpeg",
-        ".png",
-        ".gif",
-        ".bmp",
-        ".webp",
-      ]);
-      const videoExtensions = new Set([
-        ".mp4",
-        ".avi",
-        ".mov",
-        ".wmv",
-        ".flv",
-        ".mkv",
-        ".webm",
-      ]);
-
       let allFilteredObjects: ObjectInfo[] = [];
       let totalEstimated = 0;
       let hasMore = false;
@@ -115,15 +97,9 @@ export const bucket = {
           }
 
           const name = key.split("/").pop() || key;
-          const ext = name.toLowerCase().substring(name.lastIndexOf("."));
-
           // 检查文件类型
-          let fileType = "";
-          if (imageExtensions.has(ext)) {
-            fileType = "image";
-          } else if (videoExtensions.has(ext)) {
-            fileType = "video";
-          } else {
+          let fileType = getFileType(name);
+          if (fileType === "unknown") {
             continue; // 跳过非图片/视频文件
           }
 
@@ -131,7 +107,7 @@ export const bucket = {
             key,
             name,
             type: fileType,
-            size: ((obj.Size || 0)/ 1024 / 1024).toFixed(1) + 'MB',
+            size: ((obj.Size || 0) / 1024 / 1024).toFixed(1) + "MB",
             last_modified: obj.LastModified
               ? obj.LastModified.toISOString()
               : new Date().toISOString(),
@@ -252,19 +228,19 @@ export const bucket = {
   async getObjectUrl(bucketInfo: Bucket, key: string): Promise<string> {
     try {
       const s3 = getS3(bucketInfo.region, bucketInfo.access);
-      
+
       // 由于 bucket 不是 public，需要生成预签名 URL
       const command = new GetObjectCommand({
         Bucket: bucketInfo.name,
         Key: key,
       });
-      
+
       // 生成1小时有效的预签名 URL
       const signedUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
       return signedUrl;
     } catch (error) {
-      console.error('Error getting S3 object URL:', error);
-      message.error('Failed to get image URL');
+      console.error("Error getting S3 object URL:", error);
+      message.error("Failed to get image URL");
       throw error;
     }
   },

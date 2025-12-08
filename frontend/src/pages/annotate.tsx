@@ -1,6 +1,6 @@
 import { useParams } from "react-router";
 import Header from "../components/Header";
-import { AnnonatePanel } from "@/components/annonate_panel";
+import { AnnonatePanel } from "@/components/annotate/annonate_panel";
 import { useRequest } from "ahooks";
 import { api } from "@/lib/api";
 import { Spin } from "antd";
@@ -28,26 +28,27 @@ export default function Annotate() {
   };
   const onCompleteTask = async (taskId: number) => {
     // TODO: complete task
-    api.task.updateTaskStatus({task_id: taskId, status:TaskStatus.processed});
+    api.task.updateTaskStatus({
+      task_id: taskId,
+      status: TaskStatus.processed,
+    });
   };
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex h-screen flex-col gap-4">
       <Header />
-      <main>
-        {!pageData?.package ? (
-          <Spin spinning />
-        ) : (
-          <AnnonatePanel
-            bucketId={pageData!.package.bucketId}
-            list={pageData!.package.items}
-            current={pageData?.task.wipIdx}
-            taskId={pageData?.task.id}
-            onCompleteAnnotate={onCompleteTask}
-            onSaveAnnotation={onSaveAnnotation}
-            description="mark all the birds in the picture"
-          />
-        )}
-      </main>
+      {!pageData?.package ? (
+        <Spin spinning />
+      ) : (
+        <AnnonatePanel
+          bucketId={pageData!.package.bucketId}
+          list={pageData!.package.items}
+          current={pageData?.task.wipIdx}
+          taskId={pageData?.task.id}
+          onCompleteAnnotate={onCompleteTask}
+          onSaveAnnotation={onSaveAnnotation}
+          description="mark all the birds in the picture"
+        />
+      )}
     </div>
   );
 }

@@ -5,8 +5,10 @@ import { Button, Table, message, Space, Modal, Select } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useState } from "react";
 import { getStatusTag } from "@/lib/util";
+import { useUserStore } from "@/store/user_store";
 
 export default function AdminTasks() {
+  const self = useUserStore(state => state.user);
   const [assignModalVisible, setAssignModalVisible] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [assignUserId, setAssignUserId] = useState<number | null>(null);
@@ -32,7 +34,7 @@ export default function AdminTasks() {
     setLoadingUsers(true);
     try {
       const response = await api.user.getUserList(1, 100);
-      setUsers(response.list);
+      setUsers(response.list.filter((user: any) => user.id !== self!.id));
     } catch (error) {
       message.error("Failed to load users");
     } finally {

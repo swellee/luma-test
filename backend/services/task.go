@@ -325,9 +325,15 @@ func (ts *TaskService) UpdateTaskStatusWithValidation(taskID, userID int64, user
 		if _, err = config.DB.Where("id = ?", task.PackageID).Cols("items").Get(pack); err != nil {
 			return nil, err
 		}
-		if annotationCount != int64(len(pack.Items)) {
+		var items []string
+		if err = json.Unmarshal([]byte(pack.Items), &items); err != nil {
+			return nil, err
+		}
+		if annotationCount != int64(len(items)) {
 			return nil, errors.New("未完成所有标注")
 		}
+		// 清除reviewer
+		task.Reviewer = 0
 	}
 	// 保存旧状态用于消息生成
 	oldStatus := task.Status

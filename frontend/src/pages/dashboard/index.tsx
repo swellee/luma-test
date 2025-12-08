@@ -28,6 +28,12 @@ export default function Dashboard() {
     checkAuthStatus();
   }, []);
 
+  useEffect(() => {
+    if (!user) {
+      navigate("/login");
+    }
+  }, [user]);
+
   const navMenuItems = useMemo(() => {
     switch (user?.role) {
       case "admin":

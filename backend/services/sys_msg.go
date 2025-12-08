@@ -35,9 +35,12 @@ func (s *SysMsgService) CreateSysMsg(req *models.SysMsgCreateRequest) (*models.S
 }
 
 // GetSysMsgList 获取系统消息列表
-func (s *SysMsgService) GetSysMsgList(userID int64, status string, page, pageSize int) ([]models.SysMsg, int64, error) {
+func (s *SysMsgService) GetSysMsgList(userID int64, status string, page, pageSize int, isAdmin bool) ([]models.SysMsg, int64, error) {
 	sysMsgs := make([]models.SysMsg, 0)
 	session := config.DB.Where("user_id = ?", userID)
+	if isAdmin {
+		session = config.DB.Where("user_id = ? OR user_id = 0", userID)
+	}
 
 	// 如果指定了状态，则添加状态筛选
 	if status != "" {
@@ -54,9 +57,13 @@ func (s *SysMsgService) GetSysMsgList(userID int64, status string, page, pageSiz
 	return sysMsgs, total, nil
 }
 
-func (s *SysMsgService) GetSysMsgUnreadCount(userID int64) (int64, error) {
+func (s *SysMsgService) GetSysMsgUnreadCount(userID int64, isAdmin bool) (int64, error) {
 	var sysMsg models.SysMsg
-	count, err := config.DB.Where("user_id = ? AND status = ?", userID, "unread").Count(&sysMsg)
+	session := config.DB.Where("user_id = ? AND status = ?", userID, "unread")
+	if isAdmin {
+		session = config.DB.Where("(user_id = ? OR user_id = 0) AND status = ?", userID, "unread")
+	}
+	count, err := session.Count(&sysMsg)
 	return count, err
 }
 

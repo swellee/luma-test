@@ -139,7 +139,8 @@ func GetProfile(c *gin.Context) {
 }
 
 func UpdateProfile(c *gin.Context) {
-	userID, exists := c.Get("user_id")
+	userID, _ := c.Get("user_id")
+	userRole, exists := c.Get("user_role")
 	if !exists {
 		utils.ResponseErr(c, "unauthorized", http.StatusUnauthorized)
 		return
@@ -150,7 +151,12 @@ func UpdateProfile(c *gin.Context) {
 		utils.ResponseErr(c, err.Error(), http.StatusBadRequest)
 		return
 	}
-	response, err := userService.UpdateProfile(userID.(int64), &req)
+	// admin can update any user
+	targetUserID := userID.(int64)
+	if userRole == "admin" && req.ID != 0 {
+		targetUserID = req.ID
+	}
+	response, err := userService.UpdateProfile(targetUserID, &req)
 	if err != nil {
 		utils.ResponseErr(c, err.Error(), http.StatusInternalServerError)
 		return

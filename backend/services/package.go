@@ -56,6 +56,14 @@ func (ps *PackageService) SavePackage(req *models.PackageReq) (*models.PackageRe
 		pkg.BucketID = req.BucketID
 		pkg.Items = string(itemsJSON)
 
+		// 检查包名是否已存在
+		count, err := config.DB.Where("name = ? AND id != ?", req.Name, *req.ID).Count(&models.Package{})
+		if err != nil {
+			return nil, err
+		}
+		if count > 0 {
+			return nil, errors.New("包名已存在")
+		}
 		_, err = config.DB.ID(*req.ID).Update(pkg)
 		if err != nil {
 			return nil, err
@@ -69,6 +77,14 @@ func (ps *PackageService) SavePackage(req *models.PackageReq) (*models.PackageRe
 			Status:   models.PackageStatusPending,
 		}
 
+		// 检查包名是否已存在
+		count, err := config.DB.Where("name = ?", req.Name).Count(&models.Package{})
+		if err != nil {
+			return nil, err
+		}
+		if count > 0 {
+			return nil, errors.New("包名已存在")
+		}
 		_, err = config.DB.Insert(pkg)
 		if err != nil {
 			return nil, err

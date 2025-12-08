@@ -13,6 +13,7 @@ import {
   Typography,
   Modal,
   Rate,
+  Checkbox,
 } from "antd";
 import circleIcon from "../assets/circle.svg";
 import rectIcon from "../assets/rectangle.svg";
@@ -25,6 +26,8 @@ import {
   SaveOutlined,
   ZoomInOutlined,
   ZoomOutOutlined,
+  ClearOutlined,
+  StopFilled,
 } from "@ant-design/icons";
 import Konva from "konva";
 import { KonvaEventListener, KonvaEventObject } from "konva/lib/Node";
@@ -68,6 +71,7 @@ export const AnnonatePanel = ({
   onCompleteReview,
 }: AnnonatePanelProps) => {
   const [currentIndex, setCurrentIndex] = useState(current);
+  const [testImg, setTestImg] = useState(false);
   const [marks, setMarks] = useState<MarkData[]>([]);
   const [reviewInfo, setReviewInfo] = useState<ReviewAnnotationReq>({
     score: 0,
@@ -487,10 +491,12 @@ export const AnnonatePanel = ({
   };
 
   const getS3ImageUrl = async (key: string): Promise<string> => {
-    //test
-    return "https://gips1.baidu.com/it/u=1647344915,1746921568&fm=3028&app=3028&f=JPEG&fmt=auto?w=720&h=1280";
-    // if (!bucketInfo) throw new Error('Bucket 信息未加载');
-    // return await api.bucket.getObjectUrl(bucketInfo, key);
+    if (testImg) {
+      return "https://gips1.baidu.com/it/u=1647344915,1746921568&fm=3028&app=3028&f=JPEG&fmt=auto?w=720&h=1280";
+    } else {
+      if (!bucketInfo) throw new Error("Bucket 信息未加载");
+      return await api.bucket.getObjectUrl(bucketInfo, key);
+    }
   };
 
   // 加载已保存的标注数据
@@ -837,12 +843,23 @@ export const AnnonatePanel = ({
               </Tooltip>
             ))}
             <Divider />
-            <h4 style={{ marginBottom: "12px" }}>Clear</h4>
-            <Button
-              danger
-              onClick={clearAllMarks}
-              icon={<DeleteOutlined />}
-            ></Button>
+            {curTool != null && (
+              <Tooltip
+                overlay="Click to Stop Drawing"
+                placement="right"
+                defaultOpen
+              >
+                <Button
+                  className="animate-pulse"
+                  danger
+                  onClick={() => {
+                    tool.current = null;
+                    setCurTool(null);
+                  }}
+                  icon={<StopFilled />}
+                ></Button>
+              </Tooltip>
+            )}
           </div>
         )}
 
@@ -863,32 +880,28 @@ export const AnnonatePanel = ({
             className="flex-1 relative"
             extra={
               <div>
-                {description && <Tag color="blue">{description}</Tag>}
-                {preloading && <Tag color="orange">预加载中...</Tag>}
+                {description && (
+                  <span className="text-orange-400">
+                    Requirement:<Tag color="blue">{description}</Tag>
+                  </span>
+                )}
+                {preloading && <Tag color="orange">preloading...</Tag>}
               </div>
             }
           >
             <div
               ref={stageContainerRef}
-              className="w-full h-[500px] bg-white/90"
+              className="w-full h-[500px] bg-transparent"
             />
-            {curTool != null && (
-              <div className="animate-pulse absolute z-2 top-16 right-4 h-8 p-4 flex items-center gap-4 bg-black/50">
-                <span className="text-green-600">Drawing {tool.current}</span>
-                <Button
-                  size="small"
-                  className=""
-                  type="primary"
-                  danger
-                  onClick={() => {
-                    tool.current = null;
-                    setCurTool(null);
-                  }}
-                >
-                  End Draw
-                </Button>
-              </div>
-            )}
+            <div className="absolute top-16 right-6">
+              s3 图片加载不了？
+              <Checkbox
+                checked={testImg}
+                onChange={(e) => setTestImg(e.target.checked)}
+              >
+                使用测试背景图
+              </Checkbox>
+            </div>
           </Card>
 
           {/* 控制栏 */}
@@ -937,11 +950,7 @@ export const AnnonatePanel = ({
         </div>
 
         {/* 右侧面板 - 标记列表和缩放控制 */}
-        <div
-          className={cn(
-            "w-[220px] flex flex-col gap-4",
-          )}
-        >
+        <div className={cn("w-[220px] flex flex-col gap-4")}>
           {!viewMode && (
             <div className="p-4 bg-black rounded-2xl">
               {/* 缩放控制 */}
@@ -991,7 +1000,18 @@ export const AnnonatePanel = ({
 
           {/* 标记列表 */}
           <div className="overflow-y-auto bg-black/90 flex-1 p-4 rounded-2xl">
-            <h4 className="text-xl text-green-700">Marks</h4>
+            <div className="header flex justify-between items-center mb-4">
+              <h4 className="text-xl text-green-700">Marks</h4>
+              <Button
+                danger
+                disabled={viewMode}
+                onClick={clearAllMarks}
+                size="small"
+                icon={<ClearOutlined />}
+              >
+                All
+              </Button>
+            </div>
             {marks.length === 0 ? (
               <div
                 style={{
@@ -1047,7 +1067,7 @@ export const AnnonatePanel = ({
                                 !viewMode && {
                                   onChange: (text) =>
                                     handleMarkTextChange(index, text),
-                                  tooltip: "点击编辑文本",
+                                  tooltip: "click to edit",
                                   maxLength: 50,
                                   autoSize: { minRows: 1, maxRows: 2 },
                                 }
@@ -1078,8 +1098,7 @@ export const AnnonatePanel = ({
               </div>
             )}
           </div>
-          {
-            reviewInfo?.score>0 && (
+          {reviewInfo?.score > 0 && (
             <div className="p-4 bg-black rounded-2xl">
               <h3 className="text-xl text-green-700">Review Info</h3>
               <Rate
@@ -1100,8 +1119,7 @@ export const AnnonatePanel = ({
                 placeholder="type your comment here"
               />
             </div>
-          ) 
-          }
+          )}
         </div>
       </div>
       <FinishAnnotateModal {...finishAnnotaeModalProps} />

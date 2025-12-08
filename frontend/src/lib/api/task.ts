@@ -90,7 +90,8 @@ export const task = {
       params: {
         task_id,
         key
-      }
+      },
+      showError: false
     })
   },
   saveReview(data: ReviewAnnotationReq){

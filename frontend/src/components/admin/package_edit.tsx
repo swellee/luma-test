@@ -14,6 +14,7 @@ import {
   List,
   Checkbox,
   Divider,
+  Typography,
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import VirtualList from "rc-virtual-list";
@@ -31,7 +32,7 @@ export default function PackageEdit() {
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [curDir, setCurDir] = useState<DirectoryNode>();
-  const selectedKeys = useRef<Set<string>>(new Set());
+  const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
   const [continuationToken, setContinuationToken] = useState<
     string | undefined
   >(undefined);
@@ -48,7 +49,7 @@ export default function PackageEdit() {
     async () => {
       const res = await api.packages.getPackageDetail(parseInt(id!));
       if (res.items.length > 0) {
-        selectedKeys.current = new Set(res.items);
+        setSelectedKeys(new Set(res.items));
       }
       return res;
     },
@@ -57,6 +58,18 @@ export default function PackageEdit() {
       refreshDeps: [id],
     }
   );
+
+  const handleChangePackName = async (name: string) => {
+    if (!packageDetail) return;
+    const res = await api.packages.savePackage({
+      ...packageDetail,
+      name,
+    });
+    if (res) {
+      message.success("Package name updated");
+      mutatePackage(res);
+    }
+  };
 
   const handleTreeSelect = (selectedKeys: React.Key[], info: any) => {
     setCurDir(info.node);
@@ -142,20 +155,29 @@ export default function PackageEdit() {
     }
   };
 
-  // 处理全选
+  
   const handleSelect = (key: string, selected: boolean) => {
     if (selected) {
-      selectedKeys.current.add(key);
-      console.log('add key', key)
+      setSelectedKeys((prev) => new Set(prev).add(key));
+      console.log("add key", key);
     } else {
-      console.log('delete key', key)
-      selectedKeys.current.delete(key);
+      console.log("delete key", key);
+      setSelectedKeys((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(key);
+        return newSet;
+      });
     }
+  };
+
+  const handleSelectAll = () => {
+    const allKeys = objects.map((obj) => obj.key);
+    setSelectedKeys(new Set(allKeys));
   };
 
   // 保存 package
   const handleSave = async () => {
-    if (!packageDetail || selectedKeys.current.size === 0) return;
+    if (!packageDetail || selectedKeys.size === 0) return false;
 
     try {
       setSaving(true);
@@ -163,11 +185,11 @@ export default function PackageEdit() {
         id: packageDetail.id,
         bucketId: packageDetail.bucketId,
         name: packageDetail.name,
-        items: Array.from(selectedKeys.current),
+        items: Array.from(selectedKeys),
       });
 
       message.success("Package saved successfully");
-
+      return true;
       // 更新本地数据
     } catch (error) {
       console.error("Failed to save package:", error);
@@ -175,6 +197,7 @@ export default function PackageEdit() {
     } finally {
       setSaving(false);
     }
+    return false;
   };
 
   // 发布 package
@@ -182,19 +205,20 @@ export default function PackageEdit() {
     if (!packageDetail) return;
 
     try {
+      const saved = await handleSave(); // 先保存
+      if (!saved) return;
       setPublishing(true);
       await api.packages.publishPackage(packageDetail.id);
 
-      message.success("Package published successfully");
+      message.success("Package published! Now back to the package list.",2, handleBack);
 
-      // 更新本地状态
-      mutatePackage({
-        ...packageDetail,
-        status: PackageStatus.PUBLISHED,
-      });
+      // // 更新本地状态
+      // mutatePackage({
+      //   ...packageDetail,
+      //   status: PackageStatus.PUBLISHED,
+      // });
 
       // 刷新页面
-      navigate(0);
     } catch (error) {
       console.error("Failed to publish package:", error);
       message.error("Failed to publish package");
@@ -268,13 +292,23 @@ export default function PackageEdit() {
   }
 
   const isPublished = packageDetail?.status === PackageStatus.PUBLISHED;
-  const canSave = selectedKeys.current.size > 0 && !isPublished;
+  const canSave = selectedKeys.size > 0 && !isPublished;
 
   return (
     <div className="p-6">
       <Card
         title={
-          <h2 className="text-green-600 text-2xl!">{packageDetail?.name}</h2>
+          <Typography.Text
+            className="text-green-600 text-2xl!"
+            editable={{
+              onChange: (text) => handleChangePackName(text),
+              tooltip: "click to edit",
+              maxLength: 50,
+              autoSize: { minRows: 1, maxRows: 2 },
+            }}
+          >
+            {packageDetail?.name}
+          </Typography.Text>
         }
         className="p-6"
         extra={
@@ -292,7 +326,7 @@ export default function PackageEdit() {
               Bucket ID: {packageDetail?.bucketId}
             </span>
             <span style={{ marginLeft: "16px" }}>
-              Items Count: {selectedKeys.current.size}
+              Items Count: {selectedKeys.size}
             </span>
           </div>
           <Button
@@ -307,7 +341,7 @@ export default function PackageEdit() {
           <Button
             type="default"
             onClick={handlePublish}
-            disabled={isPublished || selectedKeys.current.size === 0}
+            disabled={isPublished || selectedKeys.size === 0}
             loading={publishing}
           >
             {isPublished ? "Published" : "Publish Package"}
@@ -351,11 +385,9 @@ export default function PackageEdit() {
               </div>
               <div>
                 Selected files:{" "}
-                <div className="text-sm text-center">
-                  {selectedKeys.current.size}
-                </div>
+                <div className="text-sm text-center">{selectedKeys.size}</div>
               </div>
-              <Button icon={<CheckOutlined />}>check all</Button>
+              <Button icon={<CheckOutlined />} onClick={handleSelectAll}>check all</Button>
             </div>
 
             <List loading={loadingObjects} className="container-bg">
@@ -369,7 +401,7 @@ export default function PackageEdit() {
                 {(item: ObjectInfo) => (
                   <List.Item key={item.key}>
                     <Checkbox
-                      checked={selectedKeys.current.has(item.key)}
+                      checked={selectedKeys.has(item.key)}
                       onChange={(e) => handleSelect(item.key, e.target.checked)}
                     />
                     <span>{item.name}</span>

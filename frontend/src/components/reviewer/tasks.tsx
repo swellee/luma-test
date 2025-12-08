@@ -1,7 +1,17 @@
 import { api } from "@/lib/api";
 import { Task, TaskStatus } from "@/lib/types";
 import { useAntdTable } from "ahooks";
-import { Button, Table, Tag, message, Space, Modal, Radio, Tabs, Popconfirm } from "antd";
+import {
+  Button,
+  Table,
+  Tag,
+  message,
+  Space,
+  Modal,
+  Radio,
+  Tabs,
+  Popconfirm,
+} from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useState } from "react";
 import { useUserStore } from "@/store/user_store";
@@ -12,9 +22,6 @@ import { getStatusTag } from "@/lib/util";
 
 export default function ReviewerTasks() {
   const { user } = useUserStore();
-  const [statusModalVisible, setStatusModalVisible] = useState(false);
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [newStatus, setNewStatus] = useState<TaskStatus | null>(null);
 
   // 获取可领取的任务列表（processed 状态且未分配）
   const {
@@ -61,37 +68,10 @@ export default function ReviewerTasks() {
     }
   };
 
-  // 打开更新状态模态框
-  const openStatusModal = (task: Task) => {
-    setSelectedTask(task);
-    setNewStatus(null);
-    setStatusModalVisible(true);
-  };
-
-  // 更新任务状态
-  const handleUpdateStatus = async () => {
-    if (!selectedTask || !newStatus) {
-      message.error("Please select a status");
-      return;
-    }
-
-    try {
-      await api.task.updateTaskStatus({
-        task_id: selectedTask.id,
-        status: newStatus,
-      });
-      message.success("Task status updated successfully");
-      setStatusModalVisible(false);
-      refreshMyTasks();
-    } catch (error) {
-      message.error("Failed to update task status");
-    }
-  };
-
-
   const navigate = useNavigate();
-  const handleEdit = (task: Task) => navigate(router_review.replace(":id",task.id.toString()))
-  const handleApprove = async(task: Task) =>{
+  const handleEdit = (task: Task) =>
+    navigate(router_review.replace(":id", task.id.toString()));
+  const handleApprove = async (task: Task) => {
     try {
       await api.task.updateTaskStatus({
         task_id: task.id,
@@ -102,8 +82,8 @@ export default function ReviewerTasks() {
     } catch (error) {
       message.error("Failed to complete task");
     }
-  }
-  const handleReject = async(task: Task) =>{
+  };
+  const handleReject = async (task: Task) => {
     try {
       await api.task.updateTaskStatus({
         task_id: task.id,
@@ -114,7 +94,7 @@ export default function ReviewerTasks() {
     } catch (error) {
       message.error("Failed to reject task");
     }
-  }
+  };
   // 可领取任务的列
   const availableColumns: ColumnsType<Task> = [
     {
@@ -199,24 +179,7 @@ export default function ReviewerTasks() {
       width: 180,
       render: (date: string) => new Date(date).toLocaleString(),
     },
-    {
-      title: "Actions",
-      key: "actions",
-      width: 150,
-      render: (_, record: Task) => (
-        <Space size="small">
-          {record.status === TaskStatus.processed && (
-            <Button
-              type="primary"
-              size="small"
-              onClick={() => openStatusModal(record)}
-            >
-              Review
-            </Button>
-          )}
-        </Space>
-      ),
-    },
+
     {
       title: "Actions",
       key: "actions",
@@ -232,8 +195,8 @@ export default function ReviewerTasks() {
           <Popconfirm
             title={
               <div className="w-50">
-                Are you sure you want to mark this task as approved? you
-                will no longer to edit it then
+                Are you sure you want to mark this task as approved? you will no
+                longer to edit it then
               </div>
             }
             onConfirm={() => handleApprove(record)}
@@ -249,8 +212,8 @@ export default function ReviewerTasks() {
           <Popconfirm
             title={
               <div className="w-50">
-                Are you sure you want to mark this task as rejected? you
-                will no longer to edit it then
+                Are you sure you want to mark this task as rejected? you will no
+                longer to edit it then
               </div>
             }
             onConfirm={() => handleReject(record)}
@@ -300,39 +263,6 @@ export default function ReviewerTasks() {
           },
         ]}
       />
-
-      {/* 更新状态模态框 */}
-      <Modal
-        title="Review Task"
-        open={statusModalVisible}
-        onOk={handleUpdateStatus}
-        onCancel={() => setStatusModalVisible(false)}
-        okText="Submit Review"
-        cancelText="Cancel"
-      >
-        <div className="space-y-4">
-          <div>
-            <p>
-              <strong>Task:</strong> {selectedTask?.name}
-            </p>
-            <p>
-              <strong>Current Status:</strong>{" "}
-              {selectedTask && getStatusTag(selectedTask.status)}
-            </p>
-          </div>
-          <div>
-            <label className="block mb-2">Set Status:</label>
-            <Radio.Group
-              onChange={(e) => setNewStatus(e.target.value)}
-              value={newStatus}
-            >
-              <Radio value={TaskStatus.approved}>Approved</Radio>
-              <Radio value={TaskStatus.rejected}>Rejected</Radio>
-            </Radio.Group>
-          </div>
-        </div>
-      </Modal>
     </div>
   );
 }
-

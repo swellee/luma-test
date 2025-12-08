@@ -57,6 +57,7 @@ type UserResponse struct {
 
 // UserResponse 用户响应（不包含密码）
 type UserUpdateReq struct {
+	ID       int64  `json:"id"` // target user id
 	Username string `json:"username"`
 	Avatar   string `json:"avatar"`
 	Role     string `json:"role"`

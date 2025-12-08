@@ -8,20 +8,33 @@ import React from "react";
 export default function AdminPackages() {
   const bucketsRef = React.useRef<{ refresh: () => void }>(null);
   const packagesRef = React.useRef<{ refresh: () => void }>(null);
-  const bucketModalProps = useBucketAddModal(bucketsRef);
-  const packageModalProps = usePackageAddModal(bucketModalProps.open, packagesRef);
+  const bucketModalProps = useBucketAddModal();
+  const packageModalProps = usePackageAddModal(bucketModalProps.open);
 
   return (
     <div className="p-4">
       <h1 className="text-2xl! text-green-900 font-bold mb-4 flex items-center">
         Package Management
-        <Button className="ml-auto" onClick={() => bucketModalProps.open()}>
+        <Button
+          className="ml-auto"
+          onClick={() => {
+            bucketModalProps.open().then(() => {
+              // refresh buckets
+              bucketsRef.current?.refresh();
+            });
+          }}
+        >
           add bucket
         </Button>
         <Button
           type="primary"
           className="ml-2"
-          onClick={() => packageModalProps.open()}
+          onClick={() => {
+            packageModalProps.open().then(() => {
+              // refresh packages
+              packagesRef.current?.refresh();
+            });
+          }}
         >
           add package
         </Button>

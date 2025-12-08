@@ -47,6 +47,11 @@ export default function Dashboard() {
             label: "Tasks",
             icon: <FileOutlined />,
           },
+          {
+            key: router_dashboard_messages,
+            label: "Messages",
+            icon: <MessageOutlined />,
+          },
         ];
       case "reviewer":
         return [

@@ -3,9 +3,9 @@ import { User } from "../lib/types";
 import { api } from "@/lib/api";
 
 interface UserStore {
-  user: User | null;
+  user?: User;
   unreadMsgCount: number;
-  setUser: (user: User | null) => void;
+  setUser: (user?: User) => void;
   setToken: (token: string | null) => void;
   logout: () => void;
   checkAuthStatus: () => Promise<boolean>;
@@ -14,9 +14,9 @@ interface UserStore {
 }
 
 export const useUserStore = create<UserStore>((set, get) => ({
-  user: null,
+  user: undefined,
   unreadMsgCount: 0,
-  setUser: (user: User | null) => set({ user }),
+  setUser: (user?: User) => set({ user }),
   setToken: (token) => {
     if (token) {
       localStorage.setItem("token", token);
@@ -34,7 +34,7 @@ export const useUserStore = create<UserStore>((set, get) => ({
   },
   logout: () => {
     localStorage.removeItem("token");
-    set({ user: null });
+    set({ user: undefined });
   },
   checkAuthStatus: async () => {
     const { refreshData } = get();

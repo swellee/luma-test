@@ -4,26 +4,47 @@ import { Button, Form, Input, Modal, Select } from "antd";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 
-export function usePackageAddModal(
-  showAddBucket: (onFinish: () => void) => void,
-  packagesRef: any
-) {
+export function usePackageAddModal(showAddBucket: () => Promise<void>) {
   const [visible, setVisible] = useState(false);
-  const open = () => setVisible(true);
-  const close = () => setVisible(false);
-  return { visible, open, close, showAddBucket ,packagesRef};
+  const [resolvePromise, setResolvePromise] = useState<() => void>();
+  const [rejectPromise, setRejectPromise] = useState<() => void>();
+  const open = () => {
+    setVisible(true);
+    return new Promise((resolve, reject) => {
+      setResolvePromise(() => resolve);
+      setRejectPromise(() => reject);
+    });
+  };
+
+  const close = () => {
+    setVisible(false);
+    if (resolvePromise) {
+      setResolvePromise(undefined);
+    }
+  };
+
+  return {
+    visible,
+    open,
+    close,
+    showAddBucket,
+    onResolve: resolvePromise,
+    onReject: rejectPromise,
+  };
 }
 
 export function PackageAddModal({
   visible,
   close,
   showAddBucket,
-  packagesRef
+  onResolve,
+  onReject,
 }: {
   visible: boolean;
   close: () => void;
-  showAddBucket: (onFinish: () => void) => void;
-  packagesRef: any;
+  showAddBucket: () => Promise<void>;
+  onResolve?: () => void;
+  onReject?: () => void;
 }) {
   const navigate = useNavigate();
   const [form] = Form.useForm();
@@ -32,33 +53,35 @@ export function PackageAddModal({
     data: bucketOpts,
     loading: bucketLoading,
     refresh: refreshBucket,
-  } = useRequest(async () => {
-    const res = await api.bucket.listBuckets({ page: 1, page_size: 100 });
-    return res.list?.map((item) => ({
-      label: item.name,
-      value: item.id,
-    }));
-  }, { refreshDeps: [visible] });
+  } = useRequest(
+    async () => {
+      const res = await api.bucket.listBuckets({ page: 1, page_size: 100 });
+      return res.list?.map((item) => ({
+        label: item.name,
+        value: item.id,
+      }));
+    },
+    { refreshDeps: [visible] }
+  );
   const { runAsync, loading } = useRequest(
     async (values: any) => {
       const { name, bucketId } = values;
       const res = await api.packages.savePackage({ name, bucketId, items: [] });
       if (res?.id) {
         navigate(res.id);
+        onResolve?.();
+      } else {
+        onReject?.();
       }
       // @ts-ignore
       form.resetFields();
-      packagesRef.current.refresh();
       close();
     },
     { manual: true }
   );
 
   const showBucket = () => {
-    showAddBucket(() => {
-      // 当 bucket 添加成功后，刷新 bucket 列表
-      refreshBucket();
-    });
+    showAddBucket().then(refreshBucket);
   };
   return (
     <Modal
@@ -79,7 +102,9 @@ export function PackageAddModal({
         </Form.Item>
         <div className="flex gap-4 items-center mt-2">
           <span className="text-gray-500">Need new bucket?</span>{" "}
-          <Button type="text" onClick={showBucket}>add bucket</Button>
+          <Button type="text" onClick={showBucket}>
+            add bucket
+          </Button>
         </div>
       </Form>
     </Modal>

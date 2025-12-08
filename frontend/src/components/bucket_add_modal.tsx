@@ -2,64 +2,66 @@ import { api } from "@/lib/api";
 import { useRequest } from "ahooks";
 import { Form, Input, message, Modal } from "antd";
 import { useState } from "react";
-import { useNavigate } from "react-router";
 
-export function useBucketAddModal(bucketsRef:any) {
+export function useBucketAddModal() {
   const [visible, setVisible] = useState(false);
-  const [onFinishCallback, setOnFinishCallback] = useState<() => void>();
-  
-  const open = (onFinish?: () => void) => {
+  const [resolvePromise, setResolvePromise] = useState<() => void>();
+  const [rejectPromise, setRejectPromise] = useState<() => void>();
+  const open = (): Promise<void> => {
     setVisible(true);
-    setOnFinishCallback(() => onFinish);
+    return new Promise<void>((resolve, reject) => {
+      setResolvePromise(() => resolve);
+      setRejectPromise(() => reject);
+    });
   };
-  
+
   const close = () => {
     setVisible(false);
-    setOnFinishCallback(undefined);
+    if (resolvePromise) {
+      setResolvePromise(undefined);
+    }
   };
 
-  return { 
-    visible, 
-    open, 
+  return {
+    visible,
+    open,
     close,
-    onFinish: onFinishCallback,
-    bucketsRef,
+    onResolve: resolvePromise,
+    onReject: rejectPromise,
   };
 }
 
 export function BucketAddModal({
   visible,
-  onFinish,
+  onReject,
+  onResolve,
   close,
   open,
-  bucketsRef,
 }: {
   visible: boolean;
   open: () => void;
-  onFinish?: () => void;
+  onResolve?: () => void;
+  onReject?: () => void;
   close: () => void;
-  bucketsRef: any;
 }) {
   const [form] = Form.useForm();
   const { loading, runAsync } = useRequest(
     async (values: any) => {
       try {
         const res = await api.bucket.addBucket(values);
-        if(res) {
+        if (res) {
           message.success("添加成功");
         }
         // 先关闭模态框
         close();
         // 然后调用 onFinish 回调
-        if (onFinish) {
-          onFinish();
-        } else {
-          bucketsRef.current?.refresh();
+        if (onResolve) {
+          onResolve();
         }
         return res;
       } catch (error) {
         // 如果 API 调用失败，不关闭模态框
-        throw error;
+        onReject?.();
       }
     },
     { manual: true }

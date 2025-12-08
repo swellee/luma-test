@@ -6,13 +6,16 @@ import { MoreOutlined } from "@ant-design/icons";
 import { useAntdTable } from "ahooks";
 import { Avatar, Dropdown } from "antd";
 import Table, { ColumnsType } from "antd/es/table";
+import { UpdateProfileModal, useUpdateProfileModal } from "../update_profile_modal";
 
 export default function AdminUsers() {
-  const {user: self} = useUserStore();
+  const { user: self } = useUserStore();
   const { tableProps: userTableProps, refresh: refreshUserTable } =
     useAntdTable(async ({ pageSize, current }) => {
       return api.user.getUserList(current, pageSize);
     });
+
+  const updateProfileProps = useUpdateProfileModal();
   const columns: ColumnsType<User> = [
     {
       title: "ID",
@@ -37,33 +40,38 @@ export default function AdminUsers() {
     {
       title: "Action",
       key: "action",
-      render: (item: User) => (
-        item.id === self?.id? "self":
-        <Dropdown
-          menu={{
-            items: [
-              { key: "delete", label: "Delete" },
-              {
-                key: "changeRole",
-                label: "Change Role",
-                onClick: () => {
-                  console.log(item);
+      render: (item: User) =>
+        item.id === self?.id ? (
+          "self"
+        ) : (
+          <Dropdown
+            menu={{
+              items: [
+                { key: "delete", label: "Delete" },
+                {
+                  key: "change",
+                  label: "Update user",
+                  onClick: () => {
+                    updateProfileProps.open(item).then(refreshUserTable);
+                  },
                 },
-              },
-            ],
-          }}
-          trigger={["click"]}
-        >
-          <MoreOutlined />
-        </Dropdown>
-      ), // TODO: Add detail link
+              ],
+            }}
+            trigger={["click"]}
+          >
+            <MoreOutlined />
+          </Dropdown>
+        ), // TODO: Add detail link
     },
   ];
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl! text-green-900 font-bold mb-4">User Management</h1>
+      <h1 className="text-2xl! text-green-900 font-bold mb-4">
+        User Management
+      </h1>
       <Table columns={columns} {...userTableProps} />
+      <UpdateProfileModal {...updateProfileProps} />
     </div>
   );
 }

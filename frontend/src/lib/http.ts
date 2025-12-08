@@ -28,7 +28,7 @@ export const http = async <T>(
   }
 
   const isFormData = options.data instanceof FormData;
-  const {showError, ...restOptions} = options;
+  const {showError = true, ...restOptions} = options;
   const res = await fetch(url, {
     ...restOptions,
     body: options.data

@@ -24,6 +24,8 @@ func GetSysMsgList(c *gin.Context) {
 		utils.ResponseErr(c, "用户未认证", http.StatusUnauthorized)
 		return
 	}
+	userRole, _ := c.Get("user_role")
+	isAdmin := userRole == models.RoleAdmin
 
 	// 获取查询参数
 	status := c.Query("status")
@@ -41,7 +43,7 @@ func GetSysMsgList(c *gin.Context) {
 	}
 
 	// 获取消息列表
-	list, total, err := sysMsgService.GetSysMsgList(userID.(int64), status, page, pageSize)
+	list, total, err := sysMsgService.GetSysMsgList(userID.(int64), status, page, pageSize, isAdmin)
 	if err != nil {
 		utils.ResponseErr(c, err.Error(), http.StatusInternalServerError)
 		return
@@ -55,7 +57,10 @@ func GetSysMsgList(c *gin.Context) {
 
 func GetSysMsgUnreadCount(c *gin.Context) {
 	userID := c.GetInt64("user_id")
-	count, err := sysMsgService.GetSysMsgUnreadCount(userID)
+	userRole, _ := c.Get("user_role")
+	isAdmin := userRole == models.RoleAdmin
+
+	count, err := sysMsgService.GetSysMsgUnreadCount(userID, isAdmin)
 	if err != nil {
 		utils.ResponseErr(c, err.Error(), http.StatusInternalServerError)
 		return

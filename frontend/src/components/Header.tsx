@@ -98,7 +98,7 @@ export default function Header({ className }: { className?: string }) {
     {
       key: "profile",
       label: (
-        <div className="" onClick={editProps.open}>
+        <div className="" onClick={()=>editProps.open(user)}>
           Profile
         </div>
       ),
@@ -106,7 +106,7 @@ export default function Header({ className }: { className?: string }) {
 
     {
       key: "logout",
-      label: <span onClick={logoutAndGoHome}>Logout</span>,
+      label: <div onClick={logoutAndGoHome}>Logout</div>,
     },
   ];
 

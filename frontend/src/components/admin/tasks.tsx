@@ -1,5 +1,5 @@
 import { api } from "@/lib/api";
-import { Task, TaskStatus } from "@/lib/types";
+import { Role, Task, TaskStatus, User } from "@/lib/types";
 import { useAntdTable } from "ahooks";
 import { Button, Table, message, Space, Modal, Select } from "antd";
 import type { ColumnsType } from "antd/es/table";
@@ -34,7 +34,7 @@ export default function AdminTasks() {
     setLoadingUsers(true);
     try {
       const response = await api.user.getUserList(1, 100);
-      setUsers(response.list.filter((user: any) => user.id !== self!.id));
+      setUsers(response.list.filter((user: User) => user.role !== Role.ADMIN));
     } catch (error) {
       message.error("Failed to load users");
     } finally {

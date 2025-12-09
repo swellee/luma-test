@@ -73,7 +73,7 @@ export const AnnonatePanel = ({
       loadCurrentSource();
       loadSavedAnnotation();
     }
-  }, [bucketInfo, currentIndex, list]);
+  }, [bucketInfo, currentIndex, list, testImg]);
 
   // 预加载下一张图片
   useEffect(() => {

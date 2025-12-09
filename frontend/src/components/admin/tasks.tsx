@@ -86,20 +86,20 @@ export default function AdminTasks() {
       title: "Package ID",
       dataIndex: "packageId",
       key: "packageId",
-      width: 100,
+      width: 180,
     },
     {
       title: "Annotator",
       dataIndex: "annotator",
       key: "annotator",
-      width: 100,
+      width: 120,
       render: (annotator: number) => annotator || "Unassigned",
     },
     {
       title: "Reviewer",
       dataIndex: "reviewer",
       key: "reviewer",
-      width: 100,
+      width: 120,
       render: (reviewer: number) => reviewer || "Unassigned",
     },
     {

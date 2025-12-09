@@ -23,20 +23,20 @@ export default function Messages() {
 
   const columns: ColumnsType<SysMsg> = [
     {
-      title: "标题",
+      title: "Title",
       dataIndex: "title",
       key: "title",
       width: 120,
       ellipsis: true,
     },
     {
-      title: "内容",
+      title: "Content",
       dataIndex: "content",
       key: "content",
       ellipsis: true,
     },
     {
-      title: "状态",
+      title: "Status",
       dataIndex: "status",
       key: "status",
       render: (status) => (
@@ -44,7 +44,7 @@ export default function Messages() {
       ),
     },
     {
-      title: "创建时间",
+      title: "Created At",
       dataIndex: "created_at",
       key: "created_at",
       width: 120,
@@ -92,9 +92,9 @@ export default function Messages() {
         footer={null}
         centered
       >
-        <p>标题：{showInfo?.title}</p>
-        <p>内容：{showInfo?.content}</p>
-        <p>创建时间：{showInfo?.created_at}</p>
+        <p>Title: {showInfo?.title}</p>
+        <p>Content: {showInfo?.content}</p>
+        <p>Created At: {showInfo?.created_at}</p>
       </Modal>
     </div>
   );

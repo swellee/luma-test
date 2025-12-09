@@ -104,7 +104,7 @@ export default function AnnotatorTasks() {
       title: "Package ID",
       dataIndex: "packageId",
       key: "packageId",
-      width: 100,
+      width: 180,
     },
     {
       title: "Status",
@@ -155,7 +155,7 @@ export default function AnnotatorTasks() {
       title: "Package ID",
       dataIndex: "packageId",
       key: "packageId",
-      width: 100,
+      width: 180,
     },
     {
       title: "Status",
